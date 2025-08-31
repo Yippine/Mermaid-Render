@@ -2,8 +2,105 @@
 CLAUDE.md
 **/CLAUDE.md
 
-# BMad Method installation package
+# BMad Method installation package  
 .bmad-core/
 .claude/
 .cursor/
 web-bundles/
+
+# Dependencies
+node_modules/
+/.pnp
+.pnp.js
+
+# Production builds
+/.next/
+/out/
+/build/
+/dist/
+server/dist/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env.staging
+
+# Server environment files
+server/.env
+server/.env.local
+server/.env.development
+server/.env.production
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Coverage directory used by tools like istanbul
+coverage/
+*.lcov
+
+# nyc test coverage
+.nyc_output
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Next.js build output
+.next
+
+# Temporary folders
+tmp/
+temp/
+
+# Editor directories and files (personal settings)
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+# Keep shared IDE settings like extensions.json
+
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Database files
+*.sqlite
+*.sqlite3
+
+# Test results
+test-results/
+playwright-report/
+/playwright/.cache/
+
+# Vercel
+.vercel
+
+# Prisma
+prisma/migrations/**/migration.lock
+
+# Bundle analyzer
+.next-bundle-analyzer/

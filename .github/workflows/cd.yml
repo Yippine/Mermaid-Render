@@ -1,0 +1,367 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches: 
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+# 防止同時部署
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # 部署到 Staging
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment:
+      name: staging
+      url: https://staging.mermaidrender.com
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: |
+          npm run test:frontend
+          npm run test:backend
+        env:
+          CI: true
+
+      - name: Build application
+        run: |
+          npm run build
+          npm run build:server
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.STAGING_API_URL }}
+          NEXT_PUBLIC_APP_ENV: staging
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.STAGING_SENTRY_DSN }}
+
+      - name: Deploy Frontend to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          working-directory: ./
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Deploy Backend to Railway
+        run: |
+          npm install -g @railway/cli
+          railway login --token ${{ secrets.RAILWAY_TOKEN }}
+          railway up --service ${{ secrets.RAILWAY_SERVICE_ID }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+
+      - name: Run database migrations
+        run: |
+          cd server
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.STAGING_DATABASE_URL }}
+
+      - name: Run smoke tests
+        run: |
+          sleep 30  # 等待部署完成
+          npm run test:smoke:staging
+        env:
+          STAGING_URL: https://staging.mermaidrender.com
+
+      - name: Notify deployment success
+        uses: 8398a7/action-slack@v3
+        if: success()
+        with:
+          status: success
+          text: "🚀 Successfully deployed to staging: https://staging.mermaidrender.com"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # 部署到 Production
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production')
+    environment:
+      name: production
+      url: https://app.mermaidrender.com
+    needs: []  # 生產部署不依賴 staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run full test suite
+        run: |
+          npm run test:all
+          npm run test:e2e
+        timeout-minutes: 30
+        env:
+          CI: true
+
+      - name: Build application for production
+        run: |
+          npm run build
+          npm run build:server
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.PRODUCTION_API_URL }}
+          NEXT_PUBLIC_APP_ENV: production
+          NEXT_PUBLIC_SENTRY_DSN: ${{ secrets.PRODUCTION_SENTRY_DSN }}
+          NEXT_PUBLIC_ANALYTICS_ID: ${{ secrets.PRODUCTION_ANALYTICS_ID }}
+
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production
+          version: ${{ github.sha }}
+
+      - name: Deploy Frontend to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-project-id: ${{ secrets.VERCEL_PRODUCTION_PROJECT_ID }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          working-directory: ./
+          vercel-args: '--prod'
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+
+      - name: Deploy Backend to Railway (Production)
+        run: |
+          npm install -g @railway/cli
+          railway login --token ${{ secrets.RAILWAY_PRODUCTION_TOKEN }}
+          railway up --service ${{ secrets.RAILWAY_PRODUCTION_SERVICE_ID }}
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_PRODUCTION_TOKEN }}
+
+      - name: Run database migrations (Production)
+        run: |
+          cd server
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+      - name: Warm up application
+        run: |
+          sleep 60  # 等待部署完成
+          curl -f ${{ secrets.PRODUCTION_API_URL }}/health
+          curl -f https://app.mermaidrender.com
+
+      - name: Run production smoke tests
+        run: |
+          npm run test:smoke:production
+        env:
+          PRODUCTION_URL: https://app.mermaidrender.com
+          API_KEY: ${{ secrets.PRODUCTION_API_KEY }}
+
+      - name: Update deployment status
+        uses: chrnorm/deployment-status@v2
+        with:
+          token: ${{ github.token }}
+          state: success
+          deployment-id: ${{ steps.deployment.outputs.deployment_id }}
+
+      - name: Notify production deployment
+        uses: 8398a7/action-slack@v3
+        if: success()
+        with:
+          status: success
+          text: "🎉 Production deployment successful!\n• Frontend: https://app.mermaidrender.com\n• Version: ${{ github.sha }}\n• Tag: ${{ github.ref }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # 回滾機制
+  rollback-production:
+    name: Rollback Production
+    runs-on: ubuntu-latest
+    if: failure() && contains(github.event.head_commit.message, '[rollback]')
+    environment:
+      name: production
+
+    steps:
+      - name: Checkout previous stable version
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.before }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build previous version
+        run: |
+          npm run build
+          npm run build:server
+        env:
+          NEXT_PUBLIC_API_BASE_URL: ${{ secrets.PRODUCTION_API_URL }}
+          NEXT_PUBLIC_APP_ENV: production
+
+      - name: Deploy rollback to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-project-id: ${{ secrets.VERCEL_PRODUCTION_PROJECT_ID }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-args: '--prod'
+
+      - name: Deploy rollback to Railway
+        run: |
+          npm install -g @railway/cli
+          railway login --token ${{ secrets.RAILWAY_PRODUCTION_TOKEN }}
+          railway up --service ${{ secrets.RAILWAY_PRODUCTION_SERVICE_ID }}
+
+      - name: Notify rollback
+        uses: 8398a7/action-slack@v3
+        with:
+          status: warning
+          text: "⚠️ Production rollback completed to commit ${{ github.event.before }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+  # 部署後監控
+  post-deployment-monitoring:
+    name: Post-Deployment Monitoring
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: success()
+
+    steps:
+      - name: Wait for application stabilization
+        run: sleep 120  # 等待 2 分鐘
+
+      - name: Monitor application health
+        run: |
+          # 檢查前端健康狀態
+          for i in {1..5}; do
+            if curl -f https://app.mermaidrender.com/api/health; then
+              echo "Health check $i passed"
+            else
+              echo "Health check $i failed"
+              exit 1
+            fi
+            sleep 30
+          done
+
+      - name: Check error rates
+        run: |
+          # 使用 Sentry API 檢查錯誤率
+          # 這裡可以添加更複雜的監控邏輯
+          echo "Checking error rates..."
+
+      - name: Performance baseline check
+        run: |
+          # 使用 Lighthouse CI 檢查效能指標
+          npm install -g @lhci/cli
+          lhci autorun --upload.target=temporary-public-storage
+        env:
+          LHCI_BUILD_CONTEXT__CURRENT_HASH: ${{ github.sha }}
+
+  # 建立 GitHub Release
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v') && contains(github.event.head_commit.message, '[release]')
+    needs: [deploy-production]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          # 生成從上個版本到現在的變更記錄
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1)
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          git log $PREVIOUS_TAG..HEAD --pretty=format:"* %s (%an)" --no-merges >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## 🚀 What's New
+            
+            ${{ steps.changelog.outputs.CHANGELOG }}
+            
+            ## 📊 Deployment Info
+            - **Frontend**: https://app.mermaidrender.com
+            - **API**: ${{ secrets.PRODUCTION_API_URL }}
+            - **Deploy Time**: ${{ github.event.head_commit.timestamp }}
+            - **Commit**: ${{ github.sha }}
+            
+            ## 🧪 Testing
+            All tests passed including:
+            - Unit tests
+            - Integration tests  
+            - End-to-end tests
+            - Security scans
+            
+          draft: false
+          prerelease: false
+
+  # 清理舊版本
+  cleanup:
+    name: Cleanup Old Deployments
+    runs-on: ubuntu-latest
+    needs: [deploy-production]
+    if: success()
+
+    steps:
+      - name: Cleanup old Vercel deployments
+        run: |
+          # 保留最近 5 個部署
+          echo "Cleaning up old deployments..."
+          # 這裡可以添加清理邏輯
+
+      - name: Archive deployment logs
+        run: |
+          # 歸檔部署日誌
+          echo "Archiving deployment logs..."

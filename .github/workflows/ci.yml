@@ -1,0 +1,438 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+# 取消同一分支上的重複工作流程
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 程式碼品質檢查
+  lint-and-typecheck:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run Prettier check
+        run: npm run format:check
+
+      - name: TypeScript type check (Frontend)
+        run: npm run type-check
+
+      - name: TypeScript type check (Backend)
+        run: npm run type-check:server
+
+      - name: Check for unused dependencies
+        run: npx depcheck --ignores="@types/*,eslint-*,prettier,husky,lint-staged"
+
+  # 前端測試
+  frontend-tests:
+    name: Frontend Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests
+        run: npm run test:frontend
+        env:
+          CI: true
+
+      - name: Run component tests
+        run: npm run test:components
+        env:
+          CI: true
+
+      - name: Generate test coverage
+        run: npm run test:coverage:frontend
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/frontend/lcov.info
+          flags: frontend
+          name: frontend-coverage
+
+  # 後端測試
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: mermaidrender_test
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup test database
+        run: |
+          cd server
+          npx prisma migrate deploy
+          npx prisma generate
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mermaidrender_test
+          
+      - name: Run API tests
+        run: npm run test:api
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mermaidrender_test
+          REDIS_URL: redis://localhost:6379
+          JWT_SECRET: test-jwt-secret
+
+      - name: Run integration tests
+        run: npm run test:integration
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mermaidrender_test
+          REDIS_URL: redis://localhost:6379
+
+      - name: Generate test coverage
+        run: npm run test:coverage:backend
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/backend/lcov.info
+          flags: backend
+          name: backend-coverage
+
+  # 建置測試
+  build-test:
+    name: Build Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:4000/api
+          NEXT_PUBLIC_APP_ENV: test
+
+      - name: Build backend
+        run: npm run build:server
+
+      - name: Check build size
+        run: |
+          echo "Frontend build size:"
+          du -sh .next/
+          echo "Backend build size:"
+          du -sh server/dist/
+
+      - name: Test production build
+        run: |
+          npm run start &
+          sleep 10
+          curl -f http://localhost:3000 || exit 1
+          pkill -f "next start"
+
+  # 端到端測試
+  e2e-tests:
+    name: E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [frontend-tests, backend-tests, build-test]
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_USER: postgres
+          POSTGRES_DB: mermaidrender_e2e
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright
+        run: npx playwright install chromium
+
+      - name: Setup test database
+        run: |
+          cd server
+          npx prisma migrate deploy
+          npx prisma generate
+          npx prisma db seed
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mermaidrender_e2e
+
+      - name: Build application
+        run: |
+          npm run build
+          npm run build:server
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:4000/api
+          NEXT_PUBLIC_APP_ENV: test
+
+      - name: Start application
+        run: |
+          npm run start:server &
+          npm run start &
+          sleep 15
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/mermaidrender_e2e
+          REDIS_URL: redis://localhost:6379
+          PORT: 4000
+
+      - name: Wait for application
+        run: |
+          npx wait-on http://localhost:3000 -t 30000
+          npx wait-on http://localhost:4000/health -t 30000
+
+      - name: Run E2E tests
+        run: npm run test:e2e
+        env:
+          BASE_URL: http://localhost:3000
+          API_URL: http://localhost:4000
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+      - name: Upload test artifacts
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: test-results/
+
+  # 安全性掃描
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level high
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        continue-on-error: true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+      - name: CodeQL Analysis
+        uses: github/codeql-action/init@v2
+        with:
+          languages: javascript
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v2
+
+  # 效能測試
+  performance-test:
+    name: Performance Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+        env:
+          NEXT_PUBLIC_API_BASE_URL: http://localhost:4000/api
+
+      - name: Run Lighthouse CI
+        run: |
+          npm install -g @lhci/cli
+          npm run start &
+          sleep 10
+          lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Bundle size analysis
+        run: |
+          npx bundlesize
+          npx bundle-analyzer .next/static/chunks/ --analyze
+
+  # 總結報告
+  ci-summary:
+    name: CI Summary
+    runs-on: ubuntu-latest
+    needs: [lint-and-typecheck, frontend-tests, backend-tests, build-test, e2e-tests, security-scan]
+    if: always()
+
+    steps:
+      - name: Check all jobs status
+        run: |
+          echo "Lint & Type Check: ${{ needs.lint-and-typecheck.result }}"
+          echo "Frontend Tests: ${{ needs.frontend-tests.result }}"
+          echo "Backend Tests: ${{ needs.backend-tests.result }}"
+          echo "Build Test: ${{ needs.build-test.result }}"
+          echo "E2E Tests: ${{ needs.e2e-tests.result }}"
+          echo "Security Scan: ${{ needs.security-scan.result }}"
+
+      - name: Notify on success
+        if: ${{ needs.lint-and-typecheck.result == 'success' && needs.frontend-tests.result == 'success' && needs.backend-tests.result == 'success' && needs.build-test.result == 'success' && needs.e2e-tests.result == 'success' }}
+        run: echo "🎉 All CI checks passed successfully!"
+
+      - name: Notify on failure
+        if: ${{ needs.lint-and-typecheck.result == 'failure' || needs.frontend-tests.result == 'failure' || needs.backend-tests.result == 'failure' || needs.build-test.result == 'failure' || needs.e2e-tests.result == 'failure' }}
+        run: |
+          echo "❌ One or more CI checks failed"
+          exit 1
+
+  # Slack 通知 (可選)
+  notify-slack:
+    name: Slack Notification
+    runs-on: ubuntu-latest
+    needs: [ci-summary]
+    if: always() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Notify Slack on success
+        if: needs.ci-summary.result == 'success'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: "✅ CI passed for commit ${{ github.sha }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify Slack on failure
+        if: needs.ci-summary.result == 'failure'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: "❌ CI failed for commit ${{ github.sha }}"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
