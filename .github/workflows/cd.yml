@@ -2,7 +2,7 @@ name: Continuous Deployment
 
 on:
   push:
-    branches: 
+    branches:
       - main
     tags:
       - 'v*'
@@ -97,7 +97,7 @@ jobs:
         if: success()
         with:
           status: success
-          text: "🚀 Successfully deployed to staging: https://staging.mermaidrender.com"
+          text: '🚀 Successfully deployed to staging: https://staging.mermaidrender.com'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -109,7 +109,7 @@ jobs:
     environment:
       name: production
       url: https://app.mermaidrender.com
-    needs: []  # 生產部署不依賴 staging
+    needs: [] # 生產部署不依賴 staging
 
     steps:
       - name: Checkout code
@@ -255,7 +255,7 @@ jobs:
         uses: 8398a7/action-slack@v3
         with:
           status: warning
-          text: "⚠️ Production rollback completed to commit ${{ github.event.before }}"
+          text: '⚠️ Production rollback completed to commit ${{ github.event.before }}'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -268,7 +268,7 @@ jobs:
 
     steps:
       - name: Wait for application stabilization
-        run: sleep 120  # 等待 2 分鐘
+        run: sleep 120 # 等待 2 分鐘
 
       - name: Monitor application health
         run: |
@@ -328,22 +328,22 @@ jobs:
           release_name: Release ${{ github.ref_name }}
           body: |
             ## 🚀 What's New
-            
+
             ${{ steps.changelog.outputs.CHANGELOG }}
-            
+
             ## 📊 Deployment Info
             - **Frontend**: https://app.mermaidrender.com
             - **API**: ${{ secrets.PRODUCTION_API_URL }}
             - **Deploy Time**: ${{ github.event.head_commit.timestamp }}
             - **Commit**: ${{ github.sha }}
-            
+
             ## 🧪 Testing
             All tests passed including:
             - Unit tests
             - Integration tests  
             - End-to-end tests
             - Security scans
-            
+
           draft: false
           prerelease: false
 

@@ -5,7 +5,9 @@
 ## 系統概觀
 
 ### 架構願景
+
 建立一個分層、模組化的系統架構，支援從 MVP 到完整功能的平滑演進。核心設計原則：
+
 - **漸進式微服務**：MVP 採用 Monolith 設計，預留微服務拆分路徑
 - **插件化渲染引擎**：支援多種圖表類型和佈局演算法
 - **事件驅動架構**：支援實時互動和序列展示
@@ -45,7 +47,7 @@ graph TB
     end
 
     subgraph "External Services"
-        V[OpenAI API] 
+        V[OpenAI API]
         W[Cloudinary CDN]
         X[Vercel Analytics]
     end
@@ -75,6 +77,7 @@ graph TB
 ### 1. 前端架構層
 
 #### Next.js 應用架構
+
 ```typescript
 // 應用結構
 src/
@@ -101,115 +104,117 @@ src/
 ```
 
 #### 狀態管理架構
+
 ```typescript
 // Zustand Store 架構
 interface AppState {
   // 編輯器狀態
   editor: {
-    code: string;
-    language: string;
-    theme: 'light' | 'dark';
-    isLoading: boolean;
-  };
-  
+    code: string
+    language: string
+    theme: 'light' | 'dark'
+    isLoading: boolean
+  }
+
   // 渲染器狀態
   renderer: {
-    engine: 'cytoscape' | 'elk';
-    layout: string;
-    zoom: number;
-    center: { x: number; y: number };
-    isRendering: boolean;
-  };
-  
+    engine: 'cytoscape' | 'elk'
+    layout: string
+    zoom: number
+    center: { x: number; y: number }
+    isRendering: boolean
+  }
+
   // 序列展示狀態
   sequence: {
-    mode: 'area' | 'node' | 'edge';
-    isPlaying: boolean;
-    currentStep: number;
-    totalSteps: number;
-    speed: number;
-    elements: SequenceElement[];
-  };
-  
+    mode: 'area' | 'node' | 'edge'
+    isPlaying: boolean
+    currentStep: number
+    totalSteps: number
+    speed: number
+    elements: SequenceElement[]
+  }
+
   // 匯出狀態
   export: {
-    format: 'png' | 'svg';
-    resolution: number;
-    isExporting: boolean;
-    progress: number;
-  };
+    format: 'png' | 'svg'
+    resolution: number
+    isExporting: boolean
+    progress: number
+  }
 }
 ```
 
 ### 2. 渲染引擎架構
 
 #### 可插拔渲染引擎設計
+
 ```typescript
 // 渲染引擎接口
 interface RenderEngine {
-  name: string;
-  version: string;
-  supportedLayouts: string[];
-  
+  name: string
+  version: string
+  supportedLayouts: string[]
+
   // 核心方法
-  initialize(container: HTMLElement): Promise<void>;
-  render(data: GraphData): Promise<RenderResult>;
-  layout(algorithm: string): Promise<void>;
-  export(format: ExportFormat): Promise<ExportResult>;
-  destroy(): void;
-  
+  initialize(container: HTMLElement): Promise<void>
+  render(data: GraphData): Promise<RenderResult>
+  layout(algorithm: string): Promise<void>
+  export(format: ExportFormat): Promise<ExportResult>
+  destroy(): void
+
   // 事件處理
-  on(event: string, callback: Function): void;
-  off(event: string, callback: Function): void;
-  
+  on(event: string, callback: Function): void
+  off(event: string, callback: Function): void
+
   // 序列展示支援
-  highlightElement(id: string, options?: HighlightOptions): void;
-  showSequence(sequence: SequenceStep[]): Promise<void>;
-  
+  highlightElement(id: string, options?: HighlightOptions): void
+  showSequence(sequence: SequenceStep[]): Promise<void>
+
   // 未來擴展接口
-  plugin(plugin: RenderPlugin): void;
+  plugin(plugin: RenderPlugin): void
 }
 
 // Cytoscape.js 實現
 class CytoscapeEngine implements RenderEngine {
-  private cy: cytoscape.Core;
-  
+  private cy: cytoscape.Core
+
   async render(data: GraphData): Promise<RenderResult> {
     // Mermaid -> Cytoscape 轉換
-    const cytoscapeData = this.convertMermaidToCytoscape(data);
-    
+    const cytoscapeData = this.convertMermaidToCytoscape(data)
+
     // 渲染處理
-    this.cy.elements().remove();
-    this.cy.add(cytoscapeData);
-    
+    this.cy.elements().remove()
+    this.cy.add(cytoscapeData)
+
     // 佈局應用
-    await this.applyLayout();
-    
+    await this.applyLayout()
+
     return {
       success: true,
       elementCount: this.cy.elements().length,
-      renderTime: Date.now()
-    };
+      renderTime: Date.now(),
+    }
   }
-  
+
   // 序列展示實現
   async showSequence(sequence: SequenceStep[]): Promise<void> {
     for (const step of sequence) {
-      await this.highlightStep(step);
-      await this.delay(step.duration);
+      await this.highlightStep(step)
+      await this.delay(step.duration)
     }
   }
 }
 
 // ELK.js 實現
 class ELKEngine implements RenderEngine {
-  private elk: ELK;
-  
+  private elk: ELK
+
   // 階層佈局特化實現
   async layout(algorithm: string): Promise<void> {
-    const graph = this.buildELKGraph();
-    const laid = await this.elk.layout(graph);
-    this.applyELKLayout(laid);
+    const graph = this.buildELKGraph()
+    const laid = await this.elk.layout(graph)
+    this.applyELKLayout(laid)
   }
 }
 ```
@@ -217,6 +222,7 @@ class ELKEngine implements RenderEngine {
 ### 3. 後端服務架構
 
 #### Fastify 服務層設計
+
 ```typescript
 // 服務層架構
 src/
@@ -247,6 +253,7 @@ src/
 ```
 
 #### 核心服務實現
+
 ```typescript
 // 渲染服務
 @Service()
@@ -256,23 +263,29 @@ export class RenderService {
     private layoutEngine: LayoutEngine,
     private cacheService: CacheService
   ) {}
-  
-  async renderMermaid(code: string, options: RenderOptions): Promise<RenderResult> {
+
+  async renderMermaid(
+    code: string,
+    options: RenderOptions
+  ): Promise<RenderResult> {
     // 檢查快取
-    const cacheKey = this.generateCacheKey(code, options);
-    const cached = await this.cacheService.get(cacheKey);
-    if (cached) return cached;
-    
+    const cacheKey = this.generateCacheKey(code, options)
+    const cached = await this.cacheService.get(cacheKey)
+    if (cached) return cached
+
     try {
       // 語法容錯處理
-      const correctedCode = await this.mermaidParser.correctSyntax(code);
-      
+      const correctedCode = await this.mermaidParser.correctSyntax(code)
+
       // 解析 Mermaid
-      const graph = await this.mermaidParser.parse(correctedCode);
-      
+      const graph = await this.mermaidParser.parse(correctedCode)
+
       // 應用佈局
-      const layoutedGraph = await this.layoutEngine.layout(graph, options.layout);
-      
+      const layoutedGraph = await this.layoutEngine.layout(
+        graph,
+        options.layout
+      )
+
       // 產生渲染結果
       const result = {
         success: true,
@@ -281,27 +294,30 @@ export class RenderService {
         metadata: {
           nodeCount: graph.nodes.length,
           edgeCount: graph.edges.length,
-          renderTime: Date.now()
-        }
-      };
-      
+          renderTime: Date.now(),
+        },
+      }
+
       // 快取結果
-      await this.cacheService.set(cacheKey, result, 3600);
-      
-      return result;
+      await this.cacheService.set(cacheKey, result, 3600)
+
+      return result
     } catch (error) {
       return {
         success: false,
         error: error.message,
-        suggestions: await this.mermaidParser.getSuggestions(code)
-      };
+        suggestions: await this.mermaidParser.getSuggestions(code),
+      }
     }
   }
-  
+
   // 序列展示支援
-  async generateSequence(code: string, mode: SequenceMode): Promise<SequenceData> {
-    const graph = await this.mermaidParser.parse(code);
-    return this.sequenceEngine.generateSequence(graph, mode);
+  async generateSequence(
+    code: string,
+    mode: SequenceMode
+  ): Promise<SequenceData> {
+    const graph = await this.mermaidParser.parse(code)
+    return this.sequenceEngine.generateSequence(graph, mode)
   }
 }
 
@@ -312,21 +328,21 @@ export class ExportService {
     private imageProcessor: ImageProcessor,
     private queueService: QueueService
   ) {}
-  
+
   async exportImage(
-    graphData: GraphData, 
+    graphData: GraphData,
     format: ExportFormat,
     options: ExportOptions
   ): Promise<ExportResult> {
     // 大型圖表異步處理
     if (graphData.nodes.length > 500) {
-      return this.exportLargeGraph(graphData, format, options);
+      return this.exportLargeGraph(graphData, format, options)
     }
-    
+
     // 即時匯出
-    return this.exportDirectly(graphData, format, options);
+    return this.exportDirectly(graphData, format, options)
   }
-  
+
   private async exportLargeGraph(
     graphData: GraphData,
     format: ExportFormat,
@@ -336,15 +352,15 @@ export class ExportService {
     const jobId = await this.queueService.add('export', {
       graphData,
       format,
-      options
-    });
-    
+      options,
+    })
+
     return {
       success: true,
       jobId,
       status: 'queued',
-      estimatedTime: this.estimateExportTime(graphData.nodes.length)
-    };
+      estimatedTime: this.estimateExportTime(graphData.nodes.length),
+    }
   }
 }
 ```
@@ -352,115 +368,118 @@ export class ExportService {
 ### 4. 序列展示架構
 
 #### 序列展示引擎設計
+
 ```typescript
 // 序列展示核心
 export class SequenceEngine {
-  private timeline: Timeline;
-  private highlightRenderer: HighlightRenderer;
-  private animationController: AnimationController;
-  
+  private timeline: Timeline
+  private highlightRenderer: HighlightRenderer
+  private animationController: AnimationController
+
   constructor() {
-    this.timeline = new Timeline();
-    this.highlightRenderer = new HighlightRenderer();
-    this.animationController = new AnimationController();
+    this.timeline = new Timeline()
+    this.highlightRenderer = new HighlightRenderer()
+    this.animationController = new AnimationController()
   }
-  
+
   // 解析序列數據
   parseSequenceData(mermaidCode: string): SequenceData {
-    const parser = new MermaidParser();
-    const graph = parser.parse(mermaidCode);
-    
+    const parser = new MermaidParser()
+    const graph = parser.parse(mermaidCode)
+
     return {
       areas: this.extractAreas(graph),
       nodes: this.extractNodes(graph),
       edges: this.extractEdges(graph),
-      metadata: this.extractMetadata(graph)
-    };
+      metadata: this.extractMetadata(graph),
+    }
   }
-  
+
   // 建立序列時間軸
   createTimeline(sequenceData: SequenceData, mode: SequenceMode): Timeline {
-    const steps: SequenceStep[] = [];
-    
+    const steps: SequenceStep[] = []
+
     switch (mode) {
       case 'area':
-        steps.push(...this.createAreaSteps(sequenceData.areas));
-        break;
+        steps.push(...this.createAreaSteps(sequenceData.areas))
+        break
       case 'node':
-        steps.push(...this.createNodeSteps(sequenceData.nodes));
-        break;
+        steps.push(...this.createNodeSteps(sequenceData.nodes))
+        break
       case 'edge':
-        steps.push(...this.createEdgeSteps(sequenceData.edges));
-        break;
+        steps.push(...this.createEdgeSteps(sequenceData.edges))
+        break
     }
-    
-    return new Timeline(steps);
+
+    return new Timeline(steps)
   }
-  
+
   // 播放序列
   async playSequence(timeline: Timeline, options: PlayOptions): Promise<void> {
-    this.animationController.configure(options);
-    
+    this.animationController.configure(options)
+
     for (const step of timeline.steps) {
-      await this.executeStep(step);
-      
+      await this.executeStep(step)
+
       if (this.animationController.isPaused()) {
-        await this.waitForResume();
+        await this.waitForResume()
       }
     }
   }
-  
+
   private async executeStep(step: SequenceStep): Promise<void> {
     // 高亮目標元素
-    await this.highlightRenderer.highlight(step.target, step.style);
-    
+    await this.highlightRenderer.highlight(step.target, step.style)
+
     // 播放動畫
-    await this.animationController.animate(step.animation);
-    
+    await this.animationController.animate(step.animation)
+
     // 更新 UI 狀態
-    this.updateStepIndicator(step.index);
+    this.updateStepIndicator(step.index)
   }
 }
 
 // 時間軸管理
 export class Timeline {
-  private steps: SequenceStep[];
-  private currentIndex: number = 0;
-  
+  private steps: SequenceStep[]
+  private currentIndex: number = 0
+
   constructor(steps: SequenceStep[]) {
-    this.steps = steps;
+    this.steps = steps
   }
-  
+
   // 導航控制
   next(): SequenceStep | null {
     if (this.currentIndex < this.steps.length - 1) {
-      return this.steps[++this.currentIndex];
+      return this.steps[++this.currentIndex]
     }
-    return null;
+    return null
   }
-  
+
   previous(): SequenceStep | null {
     if (this.currentIndex > 0) {
-      return this.steps[--this.currentIndex];
+      return this.steps[--this.currentIndex]
     }
-    return null;
+    return null
   }
-  
+
   jumpTo(index: number): SequenceStep | null {
     if (index >= 0 && index < this.steps.length) {
-      this.currentIndex = index;
-      return this.steps[index];
+      this.currentIndex = index
+      return this.steps[index]
     }
-    return null;
+    return null
   }
-  
+
   // 狀態查詢
   get progress(): number {
-    return this.steps.length > 0 ? (this.currentIndex + 1) / this.steps.length : 0;
+    return this.steps.length > 0
+      ? (this.currentIndex + 1) / this.steps.length
+      : 0
   }
-  
+
   get isComplete(): boolean {
-    return this.currentIndex >= this.steps.length - 1;
+    return this.currentIndex >= this.steps.length - 1
   }
 }
 ```
@@ -468,145 +487,149 @@ export class Timeline {
 ### 5. 高效能匯出系統
 
 #### 匯出引擎架構
+
 ```typescript
 // 匯出引擎
 export class ExportEngine {
-  private canvasRenderer: CanvasRenderer;
-  private svgRenderer: SVGRenderer;
-  private imageProcessor: ImageProcessor;
-  private workerPool: WorkerPool;
-  
+  private canvasRenderer: CanvasRenderer
+  private svgRenderer: SVGRenderer
+  private imageProcessor: ImageProcessor
+  private workerPool: WorkerPool
+
   constructor() {
-    this.canvasRenderer = new CanvasRenderer();
-    this.svgRenderer = new SVGRenderer();
-    this.imageProcessor = new ImageProcessor();
-    this.workerPool = new WorkerPool(4); // 4 worker threads
+    this.canvasRenderer = new CanvasRenderer()
+    this.svgRenderer = new SVGRenderer()
+    this.imageProcessor = new ImageProcessor()
+    this.workerPool = new WorkerPool(4) // 4 worker threads
   }
-  
+
   async exportPNG(
-    graphData: GraphData, 
+    graphData: GraphData,
     options: PNGExportOptions
   ): Promise<ExportResult> {
     // 計算實際圖表尺寸
-    const bounds = this.calculateGraphBounds(graphData);
-    const canvasSize = this.calculateCanvasSize(bounds, options);
-    
+    const bounds = this.calculateGraphBounds(graphData)
+    const canvasSize = this.calculateCanvasSize(bounds, options)
+
     // 大型圖表分塊處理
     if (canvasSize.width > 4096 || canvasSize.height > 4096) {
-      return this.exportLargePNG(graphData, options, bounds);
+      return this.exportLargePNG(graphData, options, bounds)
     }
-    
+
     // 標準匯出
-    return this.exportStandardPNG(graphData, options, bounds);
+    return this.exportStandardPNG(graphData, options, bounds)
   }
-  
+
   private async exportLargePNG(
     graphData: GraphData,
     options: PNGExportOptions,
     bounds: GraphBounds
   ): Promise<ExportResult> {
     // 分塊策略
-    const chunks = this.calculateChunks(bounds, options);
-    const chunkResults: ChunkResult[] = [];
-    
+    const chunks = this.calculateChunks(bounds, options)
+    const chunkResults: ChunkResult[] = []
+
     // 並行渲染各區塊
-    const chunkPromises = chunks.map(chunk => 
+    const chunkPromises = chunks.map(chunk =>
       this.workerPool.execute('renderChunk', {
         graphData: this.filterGraphDataByChunk(graphData, chunk),
         options,
-        chunk
+        chunk,
       })
-    );
-    
-    const results = await Promise.all(chunkPromises);
-    
+    )
+
+    const results = await Promise.all(chunkPromises)
+
     // 合併區塊
-    const finalImage = await this.imageProcessor.combineChunks(results, bounds);
-    
+    const finalImage = await this.imageProcessor.combineChunks(results, bounds)
+
     return {
       success: true,
       data: finalImage,
       metadata: {
         originalSize: bounds,
         chunkCount: chunks.length,
-        totalPixels: finalImage.width * finalImage.height
-      }
-    };
+        totalPixels: finalImage.width * finalImage.height,
+      },
+    }
   }
-  
+
   async exportSVG(
-    graphData: GraphData, 
+    graphData: GraphData,
     options: SVGExportOptions
   ): Promise<ExportResult> {
     // SVG 向量匯出
-    const svgContent = await this.svgRenderer.render(graphData, options);
-    
+    const svgContent = await this.svgRenderer.render(graphData, options)
+
     // 優化 SVG 程式碼
     const optimizedSVG = await this.svgRenderer.optimize(svgContent, {
       removeComments: true,
       minifyStyles: true,
-      optimizePaths: true
-    });
-    
+      optimizePaths: true,
+    })
+
     return {
       success: true,
       data: optimizedSVG,
       metadata: {
         fileSize: optimizedSVG.length,
-        elementCount: graphData.nodes.length + graphData.edges.length
-      }
-    };
+        elementCount: graphData.nodes.length + graphData.edges.length,
+      },
+    }
   }
 }
 
 // Canvas 渲染器
 export class CanvasRenderer {
-  private canvas: OffscreenCanvas;
-  private ctx: OffscreenCanvasRenderingContext2D;
-  
+  private canvas: OffscreenCanvas
+  private ctx: OffscreenCanvasRenderingContext2D
+
   async renderToCanvas(
-    graphData: GraphData, 
+    graphData: GraphData,
     options: RenderOptions
   ): Promise<ImageData> {
-    this.setupCanvas(options);
-    
+    this.setupCanvas(options)
+
     // 渲染背景
-    this.renderBackground(options.backgroundColor);
-    
+    this.renderBackground(options.backgroundColor)
+
     // 渲染邊線
     for (const edge of graphData.edges) {
-      await this.renderEdge(edge, options);
+      await this.renderEdge(edge, options)
     }
-    
+
     // 渲染節點
     for (const node of graphData.nodes) {
-      await this.renderNode(node, options);
+      await this.renderNode(node, options)
     }
-    
+
     // 渲染標籤
     for (const label of graphData.labels) {
-      await this.renderLabel(label, options);
+      await this.renderLabel(label, options)
     }
-    
-    return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height);
+
+    return this.ctx.getImageData(0, 0, this.canvas.width, this.canvas.height)
   }
-  
-  private async renderNode(node: GraphNode, options: RenderOptions): Promise<void> {
+
+  private async renderNode(
+    node: GraphNode,
+    options: RenderOptions
+  ): Promise<void> {
     // 節點形狀渲染
     switch (node.shape) {
       case 'rectangle':
-        this.renderRectangle(node, options);
-        break;
+        this.renderRectangle(node, options)
+        break
       case 'circle':
-        this.renderCircle(node, options);
-        break;
+        this.renderCircle(node, options)
+        break
       case 'diamond':
-        this.renderDiamond(node, options);
-        break;
+        this.renderDiamond(node, options)
+        break
     }
-    
+
     // 節點文字渲染
-    await this.renderNodeText(node, options);
+    await this.renderNodeText(node, options)
   }
 }
 ```
@@ -686,69 +709,69 @@ CREATE INDEX idx_usage_analytics_user_id_created_at ON usage_analytics(user_id, 
 ```typescript
 // Redis 快取架構
 export class CacheService {
-  private redis: Redis;
-  
+  private redis: Redis
+
   constructor() {
-    this.redis = new Redis(process.env.REDIS_URL);
+    this.redis = new Redis(process.env.REDIS_URL)
   }
-  
+
   // 渲染結果快取
   async cacheRenderResult(
-    codeHash: string, 
-    options: RenderOptions, 
+    codeHash: string,
+    options: RenderOptions,
     result: RenderResult,
     ttl: number = 3600
   ): Promise<void> {
-    const key = this.generateRenderCacheKey(codeHash, options);
-    await this.redis.setex(key, ttl, JSON.stringify(result));
+    const key = this.generateRenderCacheKey(codeHash, options)
+    await this.redis.setex(key, ttl, JSON.stringify(result))
   }
-  
+
   async getRenderResult(
-    codeHash: string, 
+    codeHash: string,
     options: RenderOptions
   ): Promise<RenderResult | null> {
-    const key = this.generateRenderCacheKey(codeHash, options);
-    const cached = await this.redis.get(key);
-    return cached ? JSON.parse(cached) : null;
+    const key = this.generateRenderCacheKey(codeHash, options)
+    const cached = await this.redis.get(key)
+    return cached ? JSON.parse(cached) : null
   }
-  
+
   // 匯出佇列管理
   async addExportJob(jobData: ExportJobData): Promise<string> {
-    const jobId = generateId();
-    const key = `export:job:${jobId}`;
-    
+    const jobId = generateId()
+    const key = `export:job:${jobId}`
+
     await Promise.all([
       this.redis.hset(key, jobData),
       this.redis.lpush('export:queue', jobId),
-      this.redis.expire(key, 86400) // 24 hours
-    ]);
-    
-    return jobId;
+      this.redis.expire(key, 86400), // 24 hours
+    ])
+
+    return jobId
   }
-  
+
   async getExportJobStatus(jobId: string): Promise<ExportJobStatus | null> {
-    const key = `export:job:${jobId}`;
-    const jobData = await this.redis.hgetall(key);
-    return jobData ? this.parseJobStatus(jobData) : null;
+    const key = `export:job:${jobId}`
+    const jobData = await this.redis.hgetall(key)
+    return jobData ? this.parseJobStatus(jobData) : null
   }
-  
+
   // 序列展示快取
   async cacheSequenceData(
     projectId: string,
     mode: SequenceMode,
     sequenceData: SequenceData
   ): Promise<void> {
-    const key = `sequence:${projectId}:${mode}`;
-    await this.redis.setex(key, 1800, JSON.stringify(sequenceData)); // 30 min
+    const key = `sequence:${projectId}:${mode}`
+    await this.redis.setex(key, 1800, JSON.stringify(sequenceData)) // 30 min
   }
-  
+
   // 使用者會話快取
   async cacheUserSession(
     sessionId: string,
     sessionData: SessionData
   ): Promise<void> {
-    const key = `session:${sessionId}`;
-    await this.redis.setex(key, 7200, JSON.stringify(sessionData)); // 2 hours
+    const key = `session:${sessionId}`
+    await this.redis.setex(key, 7200, JSON.stringify(sessionData)) // 2 hours
   }
 }
 ```
@@ -756,114 +779,122 @@ export class CacheService {
 ## Phase 2/3 功能預留接口
 
 ### 心智圖引擎接口
+
 ```typescript
 // 心智圖引擎接口（Phase 2）
 interface MindmapEngine extends RenderEngine {
   // 心智圖特有方法
-  convertFromMermaid(mermaidGraph: GraphData): MindmapData;
-  renderMindmap(mindmapData: MindmapData): Promise<RenderResult>;
-  
+  convertFromMermaid(mermaidGraph: GraphData): MindmapData
+  renderMindmap(mindmapData: MindmapData): Promise<RenderResult>
+
   // 佈局算法
-  applyRadialLayout(center: NodeId): Promise<void>;
-  applyTreeLayout(direction: 'horizontal' | 'vertical'): Promise<void>;
-  
+  applyRadialLayout(center: NodeId): Promise<void>
+  applyTreeLayout(direction: 'horizontal' | 'vertical'): Promise<void>
+
   // 互動功能
-  expandNode(nodeId: NodeId): Promise<void>;
-  collapseNode(nodeId: NodeId): Promise<void>;
-  
+  expandNode(nodeId: NodeId): Promise<void>
+  collapseNode(nodeId: NodeId): Promise<void>
+
   // XMind 整合
-  importXMind(xmindData: XMindData): Promise<MindmapData>;
-  exportXMind(mindmapData: MindmapData): Promise<XMindData>;
+  importXMind(xmindData: XMindData): Promise<MindmapData>
+  exportXMind(mindmapData: MindmapData): Promise<XMindData>
 }
 
 // XMind 解析器接口（Phase 2）
 interface XMindParser {
-  parseXMindFile(file: File): Promise<XMindData>;
-  convertToMermaid(xmindData: XMindData): Promise<string>;
-  convertFromMermaid(mermaidCode: string): Promise<XMindData>;
-  
+  parseXMindFile(file: File): Promise<XMindData>
+  convertToMermaid(xmindData: XMindData): Promise<string>
+  convertFromMermaid(mermaidCode: string): Promise<XMindData>
+
   // 雙向同步
-  syncChanges(xmindData: XMindData, mermaidChanges: MermaidDiff): Promise<XMindData>;
+  syncChanges(
+    xmindData: XMindData,
+    mermaidChanges: MermaidDiff
+  ): Promise<XMindData>
 }
 ```
 
 ### AI 服務接口
+
 ```typescript
 // AI 服務接口（Phase 3）
 interface AIService {
   // 自然語言轉圖表
   generateMermaidFromText(
-    description: string, 
+    description: string,
     context?: GenerationContext
-  ): Promise<GenerationResult>;
-  
+  ): Promise<GenerationResult>
+
   // 圖表智能編輯
-  suggestImprovements(
-    mermaidCode: string
-  ): Promise<ImprovementSuggestion[]>;
-  
+  suggestImprovements(mermaidCode: string): Promise<ImprovementSuggestion[]>
+
   // 自動擴展
   expandGraph(
-    mermaidCode: string, 
+    mermaidCode: string,
     expandOptions: ExpandOptions
-  ): Promise<ExpansionResult>;
-  
+  ): Promise<ExpansionResult>
+
   // 智能標籤生成
   generateLabels(
-    nodes: GraphNode[], 
+    nodes: GraphNode[],
     context?: LabelContext
-  ): Promise<LabelSuggestion[]>;
+  ): Promise<LabelSuggestion[]>
 }
 
 // 協作服務接口（Phase 3）
 interface CollaborationService {
   // 實時協作
-  createCollaborationSession(projectId: string): Promise<SessionId>;
-  joinSession(sessionId: SessionId, userId: string): Promise<void>;
-  
+  createCollaborationSession(projectId: string): Promise<SessionId>
+  joinSession(sessionId: SessionId, userId: string): Promise<void>
+
   // 操作同步
-  broadcastOperation(sessionId: SessionId, operation: Operation): Promise<void>;
-  handleIncomingOperation(operation: Operation): Promise<OperationResult>;
-  
+  broadcastOperation(sessionId: SessionId, operation: Operation): Promise<void>
+  handleIncomingOperation(operation: Operation): Promise<OperationResult>
+
   // 衝突解決
-  resolveConflict(conflict: Conflict): Promise<Resolution>;
-  
+  resolveConflict(conflict: Conflict): Promise<Resolution>
+
   // 歷史追蹤
-  trackChange(change: Change): Promise<void>;
-  getChangeHistory(projectId: string): Promise<Change[]>;
+  trackChange(change: Change): Promise<void>
+  getChangeHistory(projectId: string): Promise<Change[]>
 }
 ```
 
 ### 子圖表系統接口
+
 ```typescript
 // 子圖表系統接口（Phase 3）
 interface SubgraphSystem {
   // 子圖表管理
-  createSubgraph(parentNodeId: NodeId, subgraphData: GraphData): Promise<SubgraphId>;
-  getSubgraph(subgraphId: SubgraphId): Promise<GraphData>;
-  updateSubgraph(subgraphId: SubgraphId, updates: GraphData): Promise<void>;
-  deleteSubgraph(subgraphId: SubgraphId): Promise<void>;
-  
+  createSubgraph(
+    parentNodeId: NodeId,
+    subgraphData: GraphData
+  ): Promise<SubgraphId>
+  getSubgraph(subgraphId: SubgraphId): Promise<GraphData>
+  updateSubgraph(subgraphId: SubgraphId, updates: GraphData): Promise<void>
+  deleteSubgraph(subgraphId: SubgraphId): Promise<void>
+
   // 導航系統
-  navigateToSubgraph(subgraphId: SubgraphId): Promise<NavigationResult>;
-  navigateUp(): Promise<NavigationResult>;
-  getBreadcrumbs(): NavigationPath[];
-  
+  navigateToSubgraph(subgraphId: SubgraphId): Promise<NavigationResult>
+  navigateUp(): Promise<NavigationResult>
+  getBreadcrumbs(): NavigationPath[]
+
   // 跨圖表關聯
   createCrossGraphLink(
-    sourceGraph: SubgraphId, 
+    sourceGraph: SubgraphId,
     sourceNode: NodeId,
-    targetGraph: SubgraphId, 
+    targetGraph: SubgraphId,
     targetNode: NodeId
-  ): Promise<CrossLink>;
-  
-  trackCrossLinks(nodeId: NodeId): Promise<CrossLink[]>;
+  ): Promise<CrossLink>
+
+  trackCrossLinks(nodeId: NodeId): Promise<CrossLink[]>
 }
 ```
 
 ## 部署與維運架構
 
 ### 容器化部署配置
+
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -874,26 +905,26 @@ services:
       context: .
       dockerfile: Dockerfile.frontend
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NEXT_PUBLIC_API_URL=http://api:4000
     depends_on:
       - api
-  
+
   # 後端 API
   api:
     build:
       context: .
       dockerfile: Dockerfile.api
     ports:
-      - "4000:4000"
+      - '4000:4000'
     environment:
       - DATABASE_URL=postgresql://user:pass@postgres:5432/mermaidrender
       - REDIS_URL=redis://redis:6379
     depends_on:
       - postgres
       - redis
-  
+
   # 資料庫
   postgres:
     image: postgres:15
@@ -903,25 +934,25 @@ services:
       - POSTGRES_PASSWORD=pass
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  
+
   # 快取
   redis:
     image: redis:7-alpine
     volumes:
       - redis_data:/data
-  
+
   # 監控
   prometheus:
     image: prom/prometheus
     ports:
-      - "9090:9090"
+      - '9090:9090'
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
-  
+
   grafana:
     image: grafana/grafana
     ports:
-      - "3001:3000"
+      - '3001:3000'
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
@@ -934,6 +965,7 @@ volumes:
 ```
 
 ### CI/CD 流程設計
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy to Production
@@ -950,38 +982,38 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: '20'
-      
+
       # 前端測試
       - name: Test Frontend
         run: |
           npm ci
           npm run test:frontend
           npm run test:e2e
-      
+
       # 後端測試
       - name: Test Backend
         run: |
           npm run test:backend
           npm run test:integration
-  
+
   build:
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       # 建置映像檔
       - name: Build Docker Images
         run: |
           docker build -f Dockerfile.frontend -t mermaidrender/frontend .
           docker build -f Dockerfile.api -t mermaidrender/api .
-      
+
       # 推送到 Registry
       - name: Push to Registry
         run: |
           docker push mermaidrender/frontend
           docker push mermaidrender/api
-  
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -993,7 +1025,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-      
+
       # 部署到 Railway (後端)
       - name: Deploy Backend
         uses: railway/cli-action@v1
@@ -1005,34 +1037,38 @@ jobs:
 ## 監控與觀測
 
 ### 效能監控指標
+
 ```typescript
 // 效能監控
 export class PerformanceMonitor {
-  private metrics: MetricsCollector;
-  
+  private metrics: MetricsCollector
+
   constructor() {
-    this.metrics = new MetricsCollector();
+    this.metrics = new MetricsCollector()
   }
-  
+
   // 渲染效能監控
   monitorRenderPerformance(renderResult: RenderResult): void {
-    this.metrics.record('render_time', renderResult.renderTime);
-    this.metrics.record('node_count', renderResult.nodeCount);
-    this.metrics.record('memory_usage', process.memoryUsage().heapUsed);
+    this.metrics.record('render_time', renderResult.renderTime)
+    this.metrics.record('node_count', renderResult.nodeCount)
+    this.metrics.record('memory_usage', process.memoryUsage().heapUsed)
   }
-  
+
   // 匯出效能監控
   monitorExportPerformance(exportResult: ExportResult): void {
-    this.metrics.record('export_time', exportResult.exportTime);
-    this.metrics.record('file_size', exportResult.fileSize);
-    this.metrics.record('export_success_rate', exportResult.success ? 1 : 0);
+    this.metrics.record('export_time', exportResult.exportTime)
+    this.metrics.record('file_size', exportResult.fileSize)
+    this.metrics.record('export_success_rate', exportResult.success ? 1 : 0)
   }
-  
+
   // 使用者體驗監控
   monitorUserExperience(sessionData: SessionData): void {
-    this.metrics.record('page_load_time', sessionData.pageLoadTime);
-    this.metrics.record('interaction_delay', sessionData.interactionDelay);
-    this.metrics.record('error_rate', sessionData.errorCount / sessionData.totalActions);
+    this.metrics.record('page_load_time', sessionData.pageLoadTime)
+    this.metrics.record('interaction_delay', sessionData.interactionDelay)
+    this.metrics.record(
+      'error_rate',
+      sessionData.errorCount / sessionData.totalActions
+    )
   }
 }
 ```
@@ -1047,12 +1083,14 @@ export class PerformanceMonitor {
 4. **未來準備**：為心智圖、AI、協作功能預留接口
 
 架構核心優勢：
+
 - 漸進式演進路徑明確
 - 技術風險可控
 - 效能瓶頸可預期並優化
 - 維運複雜度適中
 
 下一步建議：
+
 1. 建立 MVP 基礎架構 POC
 2. 核心渲染引擎技術驗證
 3. 序列展示功能原型開發
@@ -1060,4 +1098,4 @@ export class PerformanceMonitor {
 
 ---
 
-*此架構文件將隨專案發展和需求變化持續更新*
+_此架構文件將隨專案發展和需求變化持續更新_

@@ -1,0 +1,59 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// 使用者模型
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatar    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // 關聯
+  graphs Graph[]
+
+  @@map("users")
+}
+
+// 圖表模型
+model Graph {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  content     String   // Mermaid 原始內容
+  graphData   Json?    // 解析後的圖表資料
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // 關聯
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  shares   Share[]
+
+  @@map("graphs")
+}
+
+// 分享模型
+model Share {
+  id        String   @id @default(cuid())
+  code      String   @unique // 分享代碼
+  expiresAt DateTime?
+  createdAt DateTime @default(now())
+
+  // 關聯
+  graphId String
+  graph   Graph  @relation(fields: [graphId], references: [id], onDelete: Cascade)
+
+  @@map("shares")
+}

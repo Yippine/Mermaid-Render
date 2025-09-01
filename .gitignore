@@ -42,6 +42,16 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# Development and test output files
+*.txt
+*_dev.txt
+*_test.txt
+*_output.txt
+dev_*.txt
+test_*.txt
+frontend_*.txt
+backend_*.txt
+
 # Coverage directory used by tools like istanbul
 coverage/
 *.lcov

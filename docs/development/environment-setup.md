@@ -5,12 +5,14 @@
 ## 📋 系統需求
 
 ### 基本需求
+
 - **Node.js**: 20.0.0 或更高版本
 - **npm**: 9.0.0 或更高版本 (或 yarn 3.0+, pnpm 8.0+)
 - **Git**: 2.34.0 或更高版本
 - **操作系統**: Windows 10+, macOS 12+, Ubuntu 20.04+
 
 ### 推薦工具
+
 - **IDE**: VS Code 1.80+ (推薦)
 - **瀏覽器**: Chrome 100+, Firefox 100+, Safari 15+
 - **終端**: PowerShell 7+ (Windows), zsh (macOS/Linux)
@@ -18,6 +20,7 @@
 ## 🚀 快速開始
 
 ### 1. 克隆專案
+
 ```bash
 # 克隆專案倉庫
 git clone https://github.com/your-org/mermaid-render.git
@@ -29,6 +32,7 @@ npm --version   # 應該是 9.0.0+
 ```
 
 ### 2. 安裝依賴
+
 ```bash
 # 安裝所有依賴 (根目錄 + 前端 + 後端)
 npm install
@@ -39,6 +43,7 @@ npm install
 ```
 
 ### 3. 環境變數設定
+
 ```bash
 # 複製環境變數範本
 cp .env.example .env.local
@@ -50,6 +55,7 @@ nano server/.env.local
 ```
 
 ### 4. 資料庫設定
+
 ```bash
 # 啟動本地 PostgreSQL (使用 Docker)
 docker-compose -f docker-compose.dev.yml up -d postgres redis
@@ -67,6 +73,7 @@ npx prisma db seed
 ```
 
 ### 5. 啟動開發服務
+
 ```bash
 # 終端 1: 啟動前端開發服務器
 npm run dev
@@ -79,7 +86,9 @@ npm run db:dev
 ```
 
 ### 6. 驗證安裝
+
 打開瀏覽器訪問：
+
 - **前端**: http://localhost:3000
 - **後端 API**: http://localhost:4000/health
 - **API 文件**: http://localhost:4000/docs
@@ -89,6 +98,7 @@ npm run db:dev
 ### 環境變數配置
 
 #### 前端環境變數 (.env.local)
+
 ```env
 # Next.js 配置
 NEXT_PUBLIC_APP_ENV=development
@@ -109,6 +119,7 @@ NEXT_PUBLIC_ENABLE_COLLABORATION=false
 ```
 
 #### 後端環境變數 (server/.env.local)
+
 ```env
 # 應用配置
 NODE_ENV=development
@@ -142,6 +153,7 @@ EXPORT_QUEUE_CONCURRENCY=3
 ### 資料庫設定
 
 #### 使用 Docker (推薦)
+
 ```yaml
 # docker-compose.dev.yml
 version: '3.8'
@@ -154,7 +166,7 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
     command: postgres -c log_statement=all
@@ -163,7 +175,7 @@ services:
     image: redis:7-alpine
     container_name: mermaid-render-redis-dev
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_dev_data:/data
 
@@ -173,6 +185,7 @@ volumes:
 ```
 
 #### 手動安裝
+
 ```bash
 # Ubuntu/Debian
 sudo apt update
@@ -190,7 +203,9 @@ choco install postgresql redis
 ### 開發工具設定
 
 #### VS Code 配置
+
 建立 `.vscode/settings.json`:
+
 ```json
 {
   "typescript.preferences.importModuleSpecifier": "relative",
@@ -216,6 +231,7 @@ choco install postgresql redis
 ```
 
 #### VS Code 推薦擴展 (.vscode/extensions.json)
+
 ```json
 {
   "recommendations": [
@@ -234,6 +250,7 @@ choco install postgresql redis
 ## 🏗️ 專案結構
 
 ### 目錄結構說明
+
 ```
 Mermaid-Render/
 ├── src/                      # 前端源碼
@@ -268,6 +285,7 @@ Mermaid-Render/
 ```
 
 ### 重要配置檔案
+
 - `next.config.js` - Next.js 配置
 - `tailwind.config.js` - Tailwind CSS 配置
 - `tsconfig.json` - TypeScript 配置
@@ -279,6 +297,7 @@ Mermaid-Render/
 ## 🧪 開發工作流程
 
 ### 日常開發流程
+
 ```bash
 # 1. 更新本地代碼
 git pull origin main
@@ -306,6 +325,7 @@ git push origin feature/your-feature-name
 ```
 
 ### 常用開發命令
+
 ```bash
 # 前端開發
 npm run dev              # 啟動 Next.js 開發服務器
@@ -313,7 +333,7 @@ npm run build            # 建置前端專案
 npm run start            # 啟動生產模式
 npm run lint:fix         # 修復 lint 問題
 
-# 後端開發  
+# 後端開發
 npm run server           # 啟動 Fastify 開發服務器
 npm run server:build     # 建置後端專案
 npm run server:start     # 啟動生產模式後端
@@ -341,6 +361,7 @@ npm run check            # 檢查專案健康狀態
 ### 常見問題解決
 
 #### 1. Node.js 版本問題
+
 ```bash
 # 檢查版本
 node --version
@@ -355,6 +376,7 @@ fnm use 20.0.0
 ```
 
 #### 2. 依賴安裝失敗
+
 ```bash
 # 清理 npm 快取
 npm cache clean --force
@@ -369,6 +391,7 @@ yarn install
 ```
 
 #### 3. 資料庫連接問題
+
 ```bash
 # 檢查 PostgreSQL 狀態
 docker ps  # 檢查容器是否運行
@@ -382,6 +405,7 @@ npm run db:check
 ```
 
 #### 4. 編輯器問題
+
 ```bash
 # 重新生成 TypeScript 定義
 npx prisma generate
@@ -392,6 +416,7 @@ Ctrl+Shift+P -> "TypeScript: Restart TS Server"
 ```
 
 #### 5. 埠號衝突
+
 ```bash
 # 檢查埠號使用情況
 lsof -i :3000  # 前端埠號
@@ -406,6 +431,7 @@ kill -9 <PID>
 ### 效能調優
 
 #### 開發模式效能優化
+
 ```bash
 # 增加 Node.js 記憶體限制
 export NODE_OPTIONS="--max-old-space-size=4096"
@@ -421,6 +447,7 @@ echo "FAST_REFRESH=true" >> .env.local
 ### 除錯工具
 
 #### 前端除錯
+
 ```javascript
 // React Developer Tools
 // Redux DevTools (如果使用)
@@ -437,6 +464,7 @@ const nextConfig = {
 ```
 
 #### 後端除錯
+
 ```bash
 # 使用 Node.js inspector
 node --inspect server/src/server.ts
@@ -463,18 +491,21 @@ node --inspect server/src/server.ts
 ## 📚 開發資源
 
 ### 官方文件
+
 - [Next.js 文件](https://nextjs.org/docs)
 - [Fastify 文件](https://www.fastify.io/docs/)
 - [Prisma 文件](https://www.prisma.io/docs)
 - [Tailwind CSS 文件](https://tailwindcss.com/docs)
 
 ### 專案特定資源
+
 - [架構設計文件](../architecture/system-architecture.md)
 - [API 規範文件](../api/api-specification.md)
 - [UI/UX 設計規範](../front-end-spec.md)
 - [測試策略文件](../testing/testing-strategy.md)
 
 ### 開發者工具
+
 - [VS Code Mermaid 擴展](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid)
 - [Mermaid Live Editor](https://mermaid.live/)
 - [Prisma Studio](https://www.prisma.io/studio)
@@ -482,12 +513,15 @@ node --inspect server/src/server.ts
 ## 🤝 貢獻指南
 
 ### 程式碼規範
+
 請參考：
+
 - [編碼標準](../architecture/coding-standards.md)
 - [Git 工作流程](../development/git-workflow.md)
 - [Code Review 指南](../development/code-review-guide.md)
 
 ### 提交 PR 前的檢查清單
+
 - [ ] 程式碼通過所有 lint 檢查
 - [ ] 所有測試通過
 - [ ] 類型檢查無錯誤

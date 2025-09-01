@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# 執行 lint-staged
+npx lint-staged
+
+# 型別檢查
+npm run type-check
+
+# 後端型別檢查 (如果後端專案存在)
+if [ -d "server" ]; then
+  cd server && npm run type-check && cd ..
+fi

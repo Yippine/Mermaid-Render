@@ -1,53 +1,61 @@
 # Story 1.4: 智能語法容錯系統
 
 ## Status
+
 **Draft**
 
 ## Story
 
 **身份**: 使用者  
 **需求**: 即使語法有小錯誤也能成功渲染圖表  
-**目的**: 我不會因為語法問題而無法看到圖表效果  
+**目的**: 我不會因為語法問題而無法看到圖表效果
 
 ## 驗收標準
 
 ### AC1: 常見語法錯誤自動修復
+
 - [ ] 實現常見語法錯誤的自動修復（如缺少引號、多餘空格）
 - [ ] 支援節點ID命名錯誤修復
 - [ ] 處理箭頭語法不一致問題
 - [ ] 修復常見的縮排問題
 
 ### AC2: 混合版本語法相容性處理
+
 - [ ] 支援 Mermaid v8、v9、v10 語法混合使用
 - [ ] 自動識別並轉換舊版語法到新版
 - [ ] 處理語法版本衝突的智能選擇
 - [ ] 提供版本相容性警告
 
 ### AC3: 智能錯誤提示和修復建議
+
 - [ ] 提供具體的錯誤位置指示
 - [ ] 給出智能修復建議
 - [ ] 顯示修復前後的差異比較
 - [ ] 支援一鍵應用修復建議
 
 ### AC4: 漸進式語法解析
+
 - [ ] 部分錯誤不影響整體渲染
 - [ ] 錯誤區塊隔離，正確部分正常顯示
 - [ ] 支援語法片段的獨立解析
 - [ ] 提供語法健康度評分
 
 ### AC5: 錯誤記錄和分析
+
 - [ ] 記錄所有語法錯誤和修復結果
 - [ ] 提供錯誤統計和分析報告
 - [ ] 支援錯誤模式學習和優化
 - [ ] 實現錯誤趨勢分析
 
 ### AC6: 容錯率達到95%以上
+
 - [ ] 建立語法測試案例庫
 - [ ] 實現自動化容錯率測試
 - [ ] 持續監控容錯效果
 - [ ] 定期更新容錯規則
 
 ### AC7: 使用者控制選項
+
 - [ ] 提供容錯模式開啟/關閉選項
 - [ ] 支援容錯級別調整（嚴格/標準/寬鬆）
 - [ ] 允許自訂容錯規則
@@ -108,6 +116,7 @@
 ### 技術架構資訊
 
 **核心技術棧** [Source: docs/architecture/tech-stack.md]:
+
 - 前端使用 Next.js 14 + TypeScript + React 18
 - 狀態管理使用 Zustand
 - 圖形處理使用 Cytoscape.js + ELK.js
@@ -115,16 +124,19 @@
 - 資料庫使用 PostgreSQL + Prisma ORM
 
 **語法解析相關技術**:
+
 - Mermaid.js 最新版本進行語法解析
 - 可能需要整合 AST (抽象語法樹) 解析
 - 使用 Zod 進行語法驗證和轉換
 
 **錯誤處理架構**:
+
 - 前端錯誤邊界處理
 - 後端異常捕獲與記錄
 - Redis 用於快取修復規則和錯誤記錄
 
 **AI 整合可能性**:
+
 - OpenAI API 可用於智能修復建議生成
 - LangChain 可用於語法錯誤模式學習
 
@@ -133,6 +145,7 @@
 根據統一專案結構，相關檔案應放置於：
 
 **前端組件位置**:
+
 ```
 src/components/editor/
 ├── syntax-analyzer/
@@ -148,6 +161,7 @@ src/lib/syntax/
 ```
 
 **後端 API 位置**:
+
 ```
 server/src/routes/syntax/
 ├── analyze.ts
@@ -159,6 +173,7 @@ server/src/services/
 ```
 
 **資料庫架構**:
+
 ```sql
 -- 錯誤記錄表
 CREATE TABLE syntax_errors (
@@ -184,18 +199,21 @@ CREATE TABLE tolerance_rules (
 ### 測試要求
 
 **測試標準** [Source: docs/architecture/tech-stack.md]:
+
 - 使用 Jest 進行單元測試
 - React Testing Library 進行組件測試
 - Playwright 進行端對端測試
 - Supertest 進行 API 測試
 
 **具體測試需求**:
+
 - 語法修復規則的單元測試 (覆蓋率 > 90%)
 - 容錯系統的整合測試
 - 不同語法錯誤場景的端對端測試
 - API 回應時間性能測試 (< 200ms)
 
 **測試檔案位置**:
+
 ```
 __tests__/lib/syntax/
 ├── parser.test.ts
@@ -229,29 +247,33 @@ server/tests/routes/syntax/
 
 ## Change Log
 
-| Date | Version | Description | Author |
-|------|---------|-------------|---------|
-| 2025-08-31 | 1.0 | 初始故事建立 | Scrum Master |
+| Date       | Version | Description  | Author       |
+| ---------- | ------- | ------------ | ------------ |
+| 2025-08-31 | 1.0     | 初始故事建立 | Scrum Master |
 
 ## Dev Agent Record
 
-*此區塊將由開發 Agent 在實作過程中填寫*
+_此區塊將由開發 Agent 在實作過程中填寫_
 
 ### Agent Model Used
-*待填寫*
+
+_待填寫_
 
 ### Debug Log References
-*待填寫*
+
+_待填寫_
 
 ### Completion Notes List
-*待填寫*
+
+_待填寫_
 
 ### File List
-*待填寫*
+
+_待填寫_
 
 ## QA Results
 
-*此區塊將由 QA Agent 在測試完成後填寫*
+_此區塊將由 QA Agent 在測試完成後填寫_
 
 ---
 

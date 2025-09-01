@@ -9,16 +9,17 @@
 
 ## ⚡ Core Breakthroughs
 
-| Pain Point | Solution | Impact |
-|------------|----------|--------|
-| 🚫 Node width limits | **Adaptive Node System** | Perfect long label display |
-| 🚫 Messy edge routing | **Smart Routing + ELK Layout** | Professional aesthetics |
-| 🚫 Static presentations | **Sequence Play + Node Approach** | Cinematic experience |
-| 🚫 Manual creation | **AI Generation** | Instant diagram creation |
+| Pain Point              | Solution                          | Impact                     |
+| ----------------------- | --------------------------------- | -------------------------- |
+| 🚫 Node width limits    | **Adaptive Node System**          | Perfect long label display |
+| 🚫 Messy edge routing   | **Smart Routing + ELK Layout**    | Professional aesthetics    |
+| 🚫 Static presentations | **Sequence Play + Node Approach** | Cinematic experience       |
+| 🚫 Manual creation      | **AI Generation**                 | Instant diagram creation   |
 
 ## 🎬 Power Demo
 
 ### 🎯 Sequence Play + Node Approach
+
 ```
 Edges 1→2→3...→N highlight in sequence
 ↓
@@ -28,6 +29,7 @@ Camera intelligently tracks, no manual movement needed
 ```
 
 ### 🤖 AI One-Click Generation
+
 ```
 "I need to show microservices architecture with API Gateway, User Service, Order Service and Database"
 ↓ 3 seconds later ↓
@@ -35,6 +37,7 @@ Complete Mermaid diagram + optimal layout + color scheme
 ```
 
 ### 📤 Instant Sharing
+
 ```
 Edit complete → One-click share link → Embed anywhere
 ```
@@ -42,6 +45,7 @@ Edit complete → One-click share link → Embed anywhere
 ## 🛠️ Tech Stack
 
 **Frontend Arsenal**
+
 ```bash
 ⚡ Next.js 14      # Lightning fast rendering
 🎨 Cytoscape.js    # Graph engine supreme
@@ -51,6 +55,7 @@ Edit complete → One-click share link → Embed anywhere
 ```
 
 **Backend Firepower**
+
 ```bash
 🚀 Fastify        # High-performance API
 🗄️ PostgreSQL     # Reliable data storage
@@ -60,42 +65,138 @@ Edit complete → One-click share link → Embed anywhere
 
 ## ⚡ Quick Start
 
+### 🚀 Method 1: Local Development (Recommended)
+
 ```bash
 # 1. Clone the project
 git clone https://github.com/your-username/Mermaid-Render.git
+cd Mermaid-Render
 
 # 2. Install dependencies
 npm install
+cd server && npm install && cd ..
 
-# 3. Start development server
+# 3. Start backend (Terminal 1)
+cd server && npm run dev
+
+# 4. Start frontend (Terminal 2)
 npm run dev
 
-# 4. Open browser
-open http://localhost:3000
+# 5. Open browser
+# Frontend: http://localhost:3000
+# Backend API: http://localhost:3001
 ```
 
-**See magic happen in 5 seconds** ✨
+### 🐳 Method 2: Docker Development
+
+```bash
+# Start only databases (recommended for development)
+npm run docker:dev
+
+# Then start frontend and backend separately (as Method 1)
+```
+
+### 🏗️ Method 3: Full Docker Stack
+
+```bash
+# Start everything in containers
+npm run docker:full
+
+# Stop everything
+npm run docker:full:down
+```
+
+**See magic happen in 30 seconds** ✨
+
+## 🧪 Available Commands
+
+### Development
+
+```bash
+npm run dev              # Start frontend development server
+npm run server:dev       # Start backend development server
+npm run build           # Build frontend for production
+npm run start           # Start production frontend server
+```
+
+### Testing & Quality
+
+```bash
+npm run test            # Run unit tests
+npm run test:watch      # Run tests in watch mode
+npm run test:e2e        # Run end-to-end tests
+npm run lint            # Run ESLint
+npm run type-check      # Run TypeScript checks
+```
+
+### Docker Operations
+
+```bash
+npm run docker:dev      # Start dev databases only
+npm run docker:dev:down # Stop dev databases
+npm run docker:full     # Start full application stack
+npm run docker:full:down # Stop full application stack
+```
+
+## 📂 Project Structure
+
+```
+Mermaid-Render/
+├── 📁 src/                    # Frontend source code
+│   ├── app/                   # Next.js App Router
+│   ├── components/            # React components
+│   ├── lib/                   # Utilities and core logic
+│   ├── hooks/                 # Custom React hooks
+│   └── types/                 # TypeScript type definitions
+├── 📁 server/                 # Backend source code
+│   ├── src/                   # Server source code
+│   ├── prisma/                # Database schema & migrations
+│   └── tests/                 # Backend tests
+├── 📁 config/                 # Configuration files
+│   ├── build/                 # Build configs (Next.js, Tailwind, etc.)
+│   ├── docker/                # Docker configurations
+│   ├── testing/               # Test configurations
+│   └── development/           # Dev tools config (ESLint, Prettier)
+├── 📁 tests/                  # Frontend tests
+│   └── e2e/                   # End-to-end tests
+├── 📁 docs/                   # Project documentation
+└── 📁 .github/                # GitHub Actions CI/CD
+```
+
+## 🔧 API Endpoints
+
+### Health & Status
+
+```bash
+GET /health                    # Health check
+GET /api/hello                 # Hello World API
+GET /api/graphs               # Graph API endpoints
+```
 
 ## 🎯 Core Features
 
 ### 🎮 Interactive Display Modes
+
 - **Sequence Player**: 1→N edge highlighting in order
 - **Node Approach**: Automatic node focus when highlighted
 - **Camera Flight**: Smooth viewport transitions
 - **Region Browse**: Smart focus switching
 
 ### 🤖 AI Superpowers
+
 - **Natural Language→Diagram**: Describe needs, get Mermaid instantly
 - **Smart Layout Optimization**: AI analyzes optimal arrangements
 - **Style Suggestions**: Professional color schemes
 
 ### 📊 Rendering Engine
+
 - **Unlimited Node Width**: Say goodbye to text truncation
 - **Multi-Layout Engines**: ELK/Dagre/Force-directed
 - **Beautiful Edge Routing**: Avoid messy intersections
 - **60FPS Animations**: Silky smooth experience
 
 ### 🔗 Collaboration & Sharing
+
 - **One-Click Share Links**: Instant shareable URLs
 - **Embed Mode**: Easy iframe integration
 - **Version Control**: Edit history tracking
@@ -103,12 +204,12 @@ open http://localhost:3000
 
 ## 🎪 Use Cases
 
-| Scenario | Impact |
-|----------|--------|
-| 📋 **Project Presentations** | Sequence playback guides audience flow |
-| 🏗️ **System Architecture** | AI generates complex diagrams, one-click beautify |
-| 📚 **Educational Demos** | Interactive step-by-step learning |
-| 💼 **Client Proposals** | Professional visuals increase persuasion |
+| Scenario                     | Impact                                            |
+| ---------------------------- | ------------------------------------------------- |
+| 📋 **Project Presentations** | Sequence playback guides audience flow            |
+| 🏗️ **System Architecture**   | AI generates complex diagrams, one-click beautify |
+| 📚 **Educational Demos**     | Interactive step-by-step learning                 |
+| 💼 **Client Proposals**      | Professional visuals increase persuasion          |
 
 ## 🚀 Why Choose Us?
 
@@ -130,6 +231,7 @@ open http://localhost:3000
 ## 💡 Contributing
 
 All forms of contribution welcome!
+
 - 🐛 Bug reports
 - 💡 Feature suggestions
 - 🔧 Code contributions

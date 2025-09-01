@@ -5,13 +5,15 @@
 ## 🎯 測試目標
 
 ### 品質目標
+
 - **程式碼覆蓋率**: > 80% (單元測試)
-- **功能覆蓋率**: > 95% (關鍵使用者流程)  
+- **功能覆蓋率**: > 95% (關鍵使用者流程)
 - **效能基準**: 渲染時間 < 500ms (100 節點圖表)
 - **相容性**: 支援 Chrome 90+, Firefox 88+, Safari 14+
 - **可靠性**: 99.5% 系統可用性
 
 ### 測試原則
+
 1. **測試金字塔**: 70% 單元測試, 20% 整合測試, 10% E2E 測試
 2. **左移測試**: 開發階段就發現和修復缺陷
 3. **自動化優先**: 所有回歸測試自動化執行
@@ -24,9 +26,9 @@
 
 ```mermaid
 graph TD
-    A[E2E Tests - 10%] --> B[Integration Tests - 20%] 
+    A[E2E Tests - 10%] --> B[Integration Tests - 20%]
     B --> C[Unit Tests - 70%]
-    
+
     A1[Playwright] --> A
     B1[Supertest] --> B
     B2[Testing Library] --> B
@@ -37,7 +39,8 @@ graph TD
 ### 1. 單元測試 (70%) - Jest + Testing Library
 
 **目標**: 測試個別函數、組件、類別的邏輯
-**覆蓋範圍**: 
+**覆蓋範圍**:
+
 - React 組件行為
 - 業務邏輯函數
 - 工具函數和 Hooks
@@ -45,6 +48,7 @@ graph TD
 - 資料模型和驗證
 
 **配置文件**: `jest.config.js`
+
 ```javascript
 const nextJest = require('next/jest')
 
@@ -87,6 +91,7 @@ module.exports = createJestConfig(customJestConfig)
 
 **目標**: 測試組件間互動和 API 端點
 **覆蓋範圍**:
+
 - API 端點功能
 - 資料庫操作
 - 外部服務整合
@@ -94,6 +99,7 @@ module.exports = createJestConfig(customJestConfig)
 - 狀態管理整合
 
 **配置範例**:
+
 ```typescript
 // __tests__/integration/api/render.test.ts
 import request from 'supertest'
@@ -110,7 +116,7 @@ describe('Render API Integration', () => {
       .post('/api/render')
       .send({
         code: 'graph TD\n  A --> B',
-        options: { theme: 'dark' }
+        options: { theme: 'dark' },
       })
       .expect(200)
 
@@ -120,8 +126,8 @@ describe('Render API Integration', () => {
         svg: expect.stringContaining('<svg'),
         metadata: expect.objectContaining({
           chartType: 'graph',
-          renderTime: expect.any(Number)
-        })
+          renderTime: expect.any(Number),
+        }),
       })
     )
   })
@@ -132,12 +138,14 @@ describe('Render API Integration', () => {
 
 **目標**: 測試完整使用者流程
 **覆蓋範圍**:
+
 - 關鍵使用者旅程
 - 跨瀏覽器相容性
 - 效能基準測試
 - 視覺回歸測試
 
 **配置文件**: `playwright.config.ts`
+
 ```typescript
 import { defineConfig, devices } from '@playwright/test'
 
@@ -147,10 +155,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ['html'],
-    ['junit', { outputFile: 'test-results/junit.xml' }]
-  ],
+  reporter: [['html'], ['junit', { outputFile: 'test-results/junit.xml' }]],
   use: {
     baseURL: 'http://localhost:3000',
     trace: 'on-first-retry',
@@ -163,7 +168,7 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     {
-      name: 'firefox', 
+      name: 'firefox',
       use: { ...devices['Desktop Firefox'] },
     },
     {
@@ -193,6 +198,7 @@ export default defineConfig({
 ### 前端測試
 
 #### React 組件測試
+
 ```typescript
 // __tests__/components/CodeEditor.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react'
@@ -202,7 +208,7 @@ import { CodeEditor } from '@/components/editor/CodeEditor'
 describe('CodeEditor', () => {
   test('should render Monaco editor', () => {
     render(<CodeEditor />)
-    
+
     const editor = screen.getByRole('textbox')
     expect(editor).toBeInTheDocument()
   })
@@ -210,27 +216,28 @@ describe('CodeEditor', () => {
   test('should handle code input and emit changes', async () => {
     const user = userEvent.setup()
     const mockOnChange = jest.fn()
-    
+
     render(<CodeEditor onChange={mockOnChange} />)
-    
+
     const editor = screen.getByRole('textbox')
     await user.type(editor, 'graph TD\n  A --> B')
-    
+
     expect(mockOnChange).toHaveBeenCalledWith('graph TD\n  A --> B')
   })
 
   test('should display syntax errors', async () => {
     render(<CodeEditor />)
-    
+
     const editor = screen.getByRole('textbox')
     await user.type(editor, 'invalid syntax')
-    
+
     expect(screen.getByRole('alert')).toHaveTextContent('語法錯誤')
   })
 })
 ```
 
 #### Hooks 測試
+
 ```typescript
 // __tests__/hooks/useMermaidRenderer.test.tsx
 import { renderHook, waitFor } from '@testing-library/react'
@@ -239,11 +246,11 @@ import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
 describe('useMermaidRenderer', () => {
   test('should render mermaid code', async () => {
     const { result } = renderHook(() => useMermaidRenderer())
-    
+
     act(() => {
       result.current.render('graph TD\n  A --> B')
     })
-    
+
     await waitFor(() => {
       expect(result.current.state).toBe('success')
       expect(result.current.svg).toContain('<svg')
@@ -252,11 +259,11 @@ describe('useMermaidRenderer', () => {
 
   test('should handle render errors', async () => {
     const { result } = renderHook(() => useMermaidRenderer())
-    
+
     act(() => {
       result.current.render('invalid mermaid')
     })
-    
+
     await waitFor(() => {
       expect(result.current.state).toBe('error')
       expect(result.current.error).toBeDefined()
@@ -268,6 +275,7 @@ describe('useMermaidRenderer', () => {
 ### 後端測試
 
 #### API 端點測試
+
 ```typescript
 // server/__tests__/routes/render.test.ts
 import { FastifyInstance } from 'fastify'
@@ -288,7 +296,7 @@ describe('Render Routes', () => {
   test('GET /health should return 200', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/health'
+      url: '/health',
     })
 
     expect(response.statusCode).toBe(200)
@@ -301,8 +309,8 @@ describe('Render Routes', () => {
       url: '/api/render',
       payload: {
         code: 'graph TD\n  A --> B',
-        options: { theme: 'dark' }
-      }
+        options: { theme: 'dark' },
+      },
     })
 
     expect(response.statusCode).toBe(200)
@@ -314,6 +322,7 @@ describe('Render Routes', () => {
 ```
 
 #### 服務層測試
+
 ```typescript
 // server/__tests__/services/RenderService.test.ts
 import { RenderService } from '@server/services/RenderService'
@@ -338,12 +347,12 @@ describe('RenderService', () => {
 
   test('should cache render results', async () => {
     const code = 'graph TD\n  A --> B'
-    
+
     // 第一次渲染
     await renderService.renderMermaid(code)
     // 第二次應該來自快取
     const result = await renderService.renderMermaid(code)
-    
+
     expect(mockMermaidParser.parse).toHaveBeenCalledTimes(1)
   })
 })
@@ -352,6 +361,7 @@ describe('RenderService', () => {
 ### E2E 測試
 
 #### 關鍵使用者流程測試
+
 ```typescript
 // e2e/editor-workflow.spec.ts
 import { test, expect } from '@playwright/test'
@@ -359,25 +369,25 @@ import { test, expect } from '@playwright/test'
 test('完整編輯器工作流程', async ({ page }) => {
   // 訪問主頁
   await page.goto('/')
-  
+
   // 等待編輯器載入
   await expect(page.getByTestId('monaco-editor')).toBeVisible()
-  
+
   // 輸入 Mermaid 程式碼
   await page.getByTestId('monaco-editor').click()
   await page.keyboard.type('graph TD\n  A --> B\n  B --> C')
-  
+
   // 等待預覽渲染
   await expect(page.getByTestId('preview-panel')).toContainText('svg')
-  
+
   // 測試序列展示功能
   await page.getByTestId('sequence-mode-btn').click()
   await expect(page.getByTestId('sequence-controls')).toBeVisible()
-  
+
   // 測試匯出功能
   await page.getByTestId('export-btn').click()
   await page.getByTestId('export-png').click()
-  
+
   // 驗證下載
   const downloadPromise = page.waitForEvent('download')
   await page.getByTestId('confirm-export').click()
@@ -387,26 +397,27 @@ test('完整編輯器工作流程', async ({ page }) => {
 ```
 
 #### 效能測試
+
 ```typescript
 // e2e/performance.spec.ts
 import { test, expect } from '@playwright/test'
 
 test('渲染效能基準測試', async ({ page }) => {
   await page.goto('/')
-  
+
   // 大型圖表測試
   const largeChart = `graph TD
     ${Array.from({ length: 100 }, (_, i) => `A${i} --> B${i}`).join('\n')}
   `
-  
+
   const startTime = Date.now()
-  
+
   await page.getByTestId('monaco-editor').click()
   await page.keyboard.type(largeChart)
-  
+
   // 等待渲染完成
   await expect(page.getByTestId('preview-panel')).toContainText('svg')
-  
+
   const renderTime = Date.now() - startTime
   expect(renderTime).toBeLessThan(2000) // 2 秒內完成
 })
@@ -415,6 +426,7 @@ test('渲染效能基準測試', async ({ page }) => {
 ## 🔧 測試工具配置
 
 ### Jest 設定檔
+
 ```javascript
 // jest.setup.js
 import '@testing-library/jest-dom'
@@ -423,17 +435,31 @@ import 'jest-canvas-mock'
 // Mock IntersectionObserver
 global.IntersectionObserver = class IntersectionObserver {
   constructor() {}
-  observe() { return null }
-  disconnect() { return null }
-  unobserve() { return null }
+  observe() {
+    return null
+  }
+  disconnect() {
+    return null
+  }
+  unobserve() {
+    return null
+  }
 }
 
-// Mock ResizeObserver  
+// Mock ResizeObserver
 global.ResizeObserver = class ResizeObserver {
-  constructor(cb) { this.cb = cb }
-  observe() { return null }
-  unobserve() { return null }
-  disconnect() { return null }
+  constructor(cb) {
+    this.cb = cb
+  }
+  observe() {
+    return null
+  }
+  unobserve() {
+    return null
+  }
+  disconnect() {
+    return null
+  }
 }
 
 // Mock Monaco Editor
@@ -443,18 +469,19 @@ jest.mock('monaco-editor/esm/vs/editor/editor.api', () => ({
       getValue: jest.fn(() => ''),
       setValue: jest.fn(),
       onDidChangeModelContent: jest.fn(),
-      dispose: jest.fn()
+      dispose: jest.fn(),
     })),
-    setTheme: jest.fn()
+    setTheme: jest.fn(),
   },
   languages: {
     register: jest.fn(),
-    setLanguageConfiguration: jest.fn()
-  }
+    setLanguageConfiguration: jest.fn(),
+  },
 }))
 ```
 
 ### 測試資料庫設定
+
 ```typescript
 // server/test/setup.ts
 import { PrismaClient } from '@prisma/client'
@@ -469,10 +496,10 @@ export async function setupTestDatabase() {
   execSync(`npx prisma migrate reset --force --schema=${schemaPath}`, {
     env: {
       ...process.env,
-      DATABASE_URL: process.env.TEST_DATABASE_URL
-    }
+      DATABASE_URL: process.env.TEST_DATABASE_URL,
+    },
   })
-  
+
   // 載入測試資料
   await seedTestData()
 }
@@ -483,14 +510,14 @@ export async function seedTestData() {
       {
         email: 'test@example.com',
         name: 'Test User',
-        plan: 'free'
+        plan: 'free',
       },
       {
-        email: 'premium@example.com', 
+        email: 'premium@example.com',
         name: 'Premium User',
-        plan: 'premium'
-      }
-    ]
+        plan: 'premium',
+      },
+    ],
   })
 }
 
@@ -505,6 +532,7 @@ export async function cleanupTestDatabase() {
 ## 📊 測試覆蓋率與品質
 
 ### 覆蓋率配置
+
 ```json
 // package.json
 {
@@ -534,6 +562,7 @@ export async function cleanupTestDatabase() {
 ```
 
 ### 品質檢查
+
 ```bash
 # 執行所有品質檢查
 npm run quality:check
@@ -542,7 +571,7 @@ npm run quality:check
 # 1. 類型檢查
 npx tsc --noEmit
 
-# 2. 程式碼檢查  
+# 2. 程式碼檢查
 npm run lint
 
 # 3. 測試覆蓋率
@@ -558,6 +587,7 @@ npx depcheck
 ## 🚀 測試最佳實踐
 
 ### 1. 測試命名規範
+
 ```typescript
 // ✅ 好的命名
 describe('UserService', () => {
@@ -568,7 +598,7 @@ describe('UserService', () => {
   })
 })
 
-// ❌ 不好的命名  
+// ❌ 不好的命名
 describe('UserService', () => {
   test('test1', () => {})
   test('user creation', () => {})
@@ -576,6 +606,7 @@ describe('UserService', () => {
 ```
 
 ### 2. Mock 策略
+
 ```typescript
 // ✅ 依賴注入 Mock
 const mockRenderService = {
@@ -585,7 +616,7 @@ const mockRenderService = {
 
 // ✅ 模組 Mock
 jest.mock('@/lib/mermaid', () => ({
-  render: jest.fn(() => Promise.resolve({ svg: '<svg></svg>' }))
+  render: jest.fn(() => Promise.resolve({ svg: '<svg></svg>' })),
 }))
 
 // ❌ 避免過度 Mock
@@ -593,13 +624,14 @@ jest.mock('@/lib/mermaid', () => ({
 ```
 
 ### 3. 測試資料管理
+
 ```typescript
 // ✅ 使用 Factory Pattern
 const createUser = (overrides = {}) => ({
   id: '1',
   email: 'test@example.com',
   name: 'Test User',
-  ...overrides
+  ...overrides,
 })
 
 // ✅ 使用 Builder Pattern
@@ -607,14 +639,14 @@ class ProjectBuilder {
   private project = {
     id: '1',
     name: 'Test Project',
-    mermaidCode: 'graph TD\n  A --> B'
+    mermaidCode: 'graph TD\n  A --> B',
   }
-  
+
   withName(name: string) {
     this.project.name = name
     return this
   }
-  
+
   build() {
     return { ...this.project }
   }
@@ -622,16 +654,17 @@ class ProjectBuilder {
 ```
 
 ### 4. 異步測試
+
 ```typescript
 // ✅ 正確處理異步
 test('should render mermaid after delay', async () => {
   const promise = renderMermaid('graph TD\n  A --> B')
-  
+
   // 驗證 loading 狀態
   expect(screen.getByText('Loading...')).toBeInTheDocument()
-  
+
   const result = await promise
-  
+
   // 驗證最終結果
   expect(result.success).toBe(true)
   expect(screen.getByTestId('rendered-svg')).toBeInTheDocument()
@@ -647,6 +680,7 @@ test('should render mermaid', () => {
 ## 🔍 測試報告與監控
 
 ### 測試報告生成
+
 ```bash
 # 生成 HTML 覆蓋率報告
 npm run test:coverage
@@ -657,6 +691,7 @@ npm run test -- --ci --coverage --testResultsProcessor=jest-junit
 ```
 
 ### CI/CD 整合
+
 ```yaml
 # GitHub Actions 測試步驟
 - name: Run tests
@@ -671,8 +706,9 @@ npm run test -- --ci --coverage --testResultsProcessor=jest-junit
 ```
 
 ### 測試度量監控
+
 - **執行時間**: 單元測試 < 5 分鐘, E2E 測試 < 15 分鐘
-- **成功率**: > 98% (排除基礎建設問題)  
+- **成功率**: > 98% (排除基礎建設問題)
 - **覆蓋率趨勢**: 維持或提升覆蓋率
 - **缺陷密度**: < 1 缺陷/1000 行程式碼
 

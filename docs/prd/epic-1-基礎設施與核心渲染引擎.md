@@ -9,6 +9,7 @@ I want **建立完整的Monorepo專案架構與開發環境**,
 so that **團隊能夠高效協作開發並確保程式碼品質**.
 
 ### Acceptance Criteria
+
 1. 建立Next.js 14 + TypeScript前端專案結構
 2. 建立Node.js + Fastify後端專案結構
 3. 配置ESLint、Prettier、Husky git hooks
@@ -24,6 +25,7 @@ I want **一個專業的程式碼編輯器與即時預覽面板**,
 so that **我能夠舒適地編寫和預覽Mermaid圖表**.
 
 ### Acceptance Criteria
+
 1. 整合Monaco Editor作為程式碼編輯器
 2. 實現左右雙面板佈局（編輯器 + 預覽）
 3. 支援Mermaid語法高亮
@@ -39,6 +41,7 @@ I want **能夠即時渲染Mermaid圖表的引擎**,
 so that **我能看到程式碼的視覺化結果**.
 
 ### Acceptance Criteria
+
 1. 整合最新版Mermaid.js函式庫
 2. 實現即時渲染功能（程式碼變更觸發渲染）
 3. 支援所有基礎Mermaid圖表類型（flowchart、sequence、class等）
@@ -54,6 +57,7 @@ I want **即使語法有小錯誤也能成功渲染圖表**,
 so that **我不會因為語法問題而無法看到圖表效果**.
 
 ### Acceptance Criteria
+
 1. 實現常見語法錯誤的自動修復（如缺少引號、多餘空格）
 2. 支援混合版本語法相容性處理
 3. 提供智能錯誤提示和修復建議
@@ -69,6 +73,7 @@ I want **節點能夠自動調整大小以完整顯示文字內容**,
 so that **長標籤和複雜文字都不會被截斷**.
 
 ### Acceptance Criteria
+
 1. 實現動態節點大小計算
 2. 支援多行文字自動換行
 3. 字型大小和節點padding智能調整

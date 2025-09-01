@@ -32,6 +32,24 @@ Mermaid-Render/
 │   ├── 📁 qa/                      # 測試文件
 │   └── 📁 stories/                 # 使用者故事
 ├── 📄 CLAUDE.md                    # Claude Code 專案配置文件
+├── 📁 config/                      # 配置檔案集中管理
+│   ├── 📁 build/                   # 建置配置
+│   │   ├── 📄 next.config.js       # Next.js 配置
+│   │   ├── 📄 tailwind.config.js   # Tailwind CSS 配置
+│   │   └── 📄 postcss.config.js    # PostCSS 配置
+│   ├── 📁 development/             # 開發工具配置
+│   │   ├── 📄 .eslintrc.json       # ESLint 規則
+│   │   ├── 📄 .prettierrc          # Prettier 格式化
+│   │   └── 📄 .prettierignore      # Prettier 忽略檔案
+│   ├── 📁 testing/                 # 測試配置
+│   │   ├── 📄 jest.config.js       # Jest 測試配置
+│   │   ├── 📄 jest.setup.js        # Jest 設定檔
+│   │   └── 📄 playwright.config.ts # Playwright E2E 配置
+│   └── 📁 docker/                  # Docker 相關
+│       ├── 📄 docker-compose.yml   # 完整服務編排
+│       ├── 📄 docker-compose.dev.yml # 開發環境配置
+│       ├── 📄 Dockerfile.frontend  # 前端映像檔
+│       └── 📄 Dockerfile.backend   # 後端映像檔
 ├── 📁 src/                         # 前端原始碼
 │   ├── 📁 app/                     # Next.js App Router
 │   │   ├── 📄 layout.tsx           # 根佈局
@@ -176,28 +194,33 @@ Mermaid-Render/
 ## 關鍵檔案說明
 
 ### 核心應用程式
+
 - `src/app/layout.tsx` - Next.js根佈局，定義全域設定
 - `src/app/page.tsx` - 主頁面，提供圖表編輯介面
 - `src/components/graph/GraphRenderer.tsx` - 核心圖表渲染組件
 - `src/lib/graph/GraphRenderer.ts` - 圖表渲染引擎核心邏輯
 
 ### 圖表處理
+
 - `src/lib/parsers/MermaidParser.ts` - Mermaid語法解析器
 - `src/lib/graph/LayoutEngine.ts` - 多種佈局演算法實作
 - `src/lib/graph/AnimationEngine.ts` - 動畫系統核心
 - `src/hooks/useGraphAnimation.ts` - 動畫控制Hook
 
 ### AI整合
+
 - `src/lib/ai/OpenAIService.ts` - OpenAI API整合服務
 - `src/lib/ai/PromptTemplates.ts` - AI提示範本管理
 - `src/app/api/ai/generate.ts` - AI圖表生成API
 
 ### 狀態管理
+
 - `src/lib/stores/graphStore.ts` - 圖表資料狀態
 - `src/lib/stores/uiStore.ts` - 使用者介面狀態
 - `src/hooks/useGraph.ts` - 圖表操作Hook
 
 ### 後端服務
+
 - `server/index.ts` - Fastify伺服器入口
 - `server/services/GraphService.ts` - 圖表業務邏輯
 - `server/routes/graphs.ts` - 圖表API路由
@@ -206,6 +229,7 @@ Mermaid-Render/
 ## 開發工作流程
 
 ### 1. 新功能開發流程
+
 ```bash
 # 1. 建立功能分支
 git checkout -b feature/new-feature
@@ -231,20 +255,23 @@ git push origin feature/new-feature
 ### 2. 資料夾使用指南
 
 **新增組件時：**
+
 1. 基礎UI組件 → `src/components/ui/`
 2. 圖表相關組件 → `src/components/graph/`
 3. 佈局組件 → `src/components/layout/`
 
 **新增API時：**
+
 1. App Router API → `src/app/api/`
 2. 後端邏輯 → `server/services/`
 3. 路由處理 → `server/routes/`
 
 **新增工具函數時：**
+
 1. 前端工具 → `src/lib/utils/`
 2. 後端工具 → `server/utils/`
 3. 共用型別 → `src/types/`
 
 ---
 
-*此結構設計確保程式碼組織清晰、易於維護且符合 Next.js 最佳實務*
+_此結構設計確保程式碼組織清晰、易於維護且符合 Next.js 最佳實務_

@@ -5,77 +5,82 @@
 ### 1. 命名規範
 
 #### 檔案命名
+
 ```typescript
 // ✅ 好的命名
-components/GraphRenderer.tsx
-hooks/useGraphAnimation.ts
-types/graph.types.ts
-utils/mermaidParser.utils.ts
+components / GraphRenderer.tsx
+hooks / useGraphAnimation.ts
+types / graph.types.ts
+utils / mermaidParser.utils.ts
 
 // ❌ 避免的命名
-components/gr.tsx
-hooks/graph.ts
-types/types.ts
+components / gr.tsx
+hooks / graph.ts
+types / types.ts
 ```
 
 #### 變數與函數命名
+
 ```typescript
 // ✅ 描述性命名
-const isNodeHighlighted = true;
-const calculateOptimalLayout = () => {};
-const ANIMATION_DURATION = 300;
+const isNodeHighlighted = true
+const calculateOptimalLayout = () => {}
+const ANIMATION_DURATION = 300
 
 // ❌ 模糊命名
-const flag = true;
-const calc = () => {};
-const DURATION = 300;
+const flag = true
+const calc = () => {}
+const DURATION = 300
 ```
 
 ### 2. 型別定義
 
 #### 介面設計原則
+
 ```typescript
 // ✅ 清楚的介面定義
 interface GraphNode {
-  id: string;
-  label: string;
-  position: Position2D;
-  style: NodeStyle;
-  metadata?: NodeMetadata;
+  id: string
+  label: string
+  position: Position2D
+  style: NodeStyle
+  metadata?: NodeMetadata
 }
 
 interface GraphEdge {
-  id: string;
-  source: string;
-  target: string;
-  style: EdgeStyle;
-  animationSequence?: number;
+  id: string
+  source: string
+  target: string
+  style: EdgeStyle
+  animationSequence?: number
 }
 
 // ❌ 避免使用any
 interface BadNode {
-  data: any; // 避免
+  data: any // 避免
 }
 ```
 
 #### 聯合型別與列舉
+
 ```typescript
 // ✅ 使用聯合型別
-type LayoutAlgorithm = 'elk' | 'dagre' | 'force-directed' | 'circular';
-type AnimationState = 'idle' | 'playing' | 'paused' | 'completed';
+type LayoutAlgorithm = 'elk' | 'dagre' | 'force-directed' | 'circular'
+type AnimationState = 'idle' | 'playing' | 'paused' | 'completed'
 
 // ✅ 使用const assertions
 const LAYOUT_ALGORITHMS = {
   ELK: 'elk',
   DAGRE: 'dagre',
   FORCE_DIRECTED: 'force-directed',
-  CIRCULAR: 'circular'
-} as const;
+  CIRCULAR: 'circular',
+} as const
 ```
 
 ### 3. React 組件標準
 
 #### 組件結構
+
 ```typescript
 // ✅ 標準組件結構
 interface GraphRendererProps {
@@ -92,17 +97,17 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
   // Hooks
   const [isAnimating, setIsAnimating] = useState(false);
   const cytoscapeRef = useRef<cytoscape.Core | null>(null);
-  
+
   // Effects
   useEffect(() => {
     initializeCytoscape();
   }, [graphData]);
-  
+
   // Handlers
   const handleNodeClick = useCallback((nodeId: string) => {
     onNodeClick?.(nodeId);
   }, [onNodeClick]);
-  
+
   // Render
   return (
     <div className="graph-renderer">
@@ -113,31 +118,33 @@ export const GraphRenderer: React.FC<GraphRendererProps> = ({
 ```
 
 #### Hooks 使用規範
+
 ```typescript
 // ✅ 自訂Hook
 export const useGraphAnimation = (graphRef: RefObject<cytoscape.Core>) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
-  
+  const [currentStep, setCurrentStep] = useState(0)
+  const [isPlaying, setIsPlaying] = useState(false)
+
   const playSequence = useCallback(async (edges: Edge[]) => {
-    setIsPlaying(true);
+    setIsPlaying(true)
     for (let i = 0; i < edges.length; i++) {
-      await animateEdge(edges[i]);
-      setCurrentStep(i + 1);
+      await animateEdge(edges[i])
+      setCurrentStep(i + 1)
     }
-    setIsPlaying(false);
-  }, []);
-  
-  return { currentStep, isPlaying, playSequence };
-};
+    setIsPlaying(false)
+  }, [])
+
+  return { currentStep, isPlaying, playSequence }
+}
 ```
 
 ## CSS/Tailwind 標準
 
 ### 1. 樣式組織
+
 ```typescript
 // ✅ 使用 clsx 合併樣式
-import clsx from 'clsx';
+import clsx from 'clsx'
 
 const buttonStyles = clsx(
   'px-4 py-2 rounded-md font-medium transition-colors',
@@ -146,49 +153,52 @@ const buttonStyles = clsx(
     'bg-gray-200 text-gray-800 hover:bg-gray-300': variant === 'secondary',
     'opacity-50 cursor-not-allowed': disabled,
   }
-);
+)
 ```
 
 ### 2. 響應式設計標準
+
 ```typescript
 // ✅ 行動優先設計
 const graphContainerStyles = clsx(
   'w-full h-screen', // 基礎樣式
-  'md:h-[80vh]',     // 中等螢幕
-  'lg:h-[90vh]'      // 大螢幕
-);
+  'md:h-[80vh]', // 中等螢幕
+  'lg:h-[90vh]' // 大螢幕
+)
 ```
 
 ## 測試標準
 
 ### 1. 單元測試
+
 ```typescript
 // tests/utils/mermaidParser.test.ts
-import { MermaidParser } from '@/utils/mermaidParser';
+import { MermaidParser } from '@/utils/mermaidParser'
 
 describe('MermaidParser', () => {
-  const parser = new MermaidParser();
-  
+  const parser = new MermaidParser()
+
   it('應該正確解析基本流程圖', () => {
     const mermaidText = `
       graph TD
       A[開始] --> B[處理]
       B --> C[結束]
-    `;
-    
-    const result = parser.parse(mermaidText);
-    
-    expect(result.nodes).toHaveLength(3);
-    expect(result.edges).toHaveLength(2);
-  });
-  
+    `
+
+    const result = parser.parse(mermaidText)
+
+    expect(result.nodes).toHaveLength(3)
+    expect(result.edges).toHaveLength(2)
+  })
+
   it('應該處理複雜的子圖結構', () => {
     // 測試實作
-  });
-});
+  })
+})
 ```
 
 ### 2. 組件測試
+
 ```typescript
 // tests/components/GraphRenderer.test.tsx
 import { render, screen } from '@testing-library/react';
@@ -199,7 +209,7 @@ describe('GraphRenderer', () => {
     nodes: [{ id: '1', label: 'Node 1' }],
     edges: []
   };
-  
+
   it('應該渲染圖表容器', () => {
     render(<GraphRenderer graphData={mockGraphData} />);
     expect(screen.getByTestId('graph-container')).toBeInTheDocument();
@@ -210,6 +220,7 @@ describe('GraphRenderer', () => {
 ## API 設計標準
 
 ### 1. RESTful API 規範
+
 ```typescript
 // ✅ 清楚的路由結構
 GET    /api/graphs           // 取得圖表清單
@@ -223,30 +234,36 @@ GET    /api/share/:code      // 取得分享圖表
 ```
 
 ### 2. 錯誤處理標準
+
 ```typescript
 // ✅ 統一錯誤回應格式
 interface APIError {
-  code: string;
-  message: string;
-  details?: any;
-  timestamp: string;
+  code: string
+  message: string
+  details?: any
+  timestamp: string
 }
 
 // 錯誤處理中間件
-export const errorHandler = (error: Error, req: Request, reply: FastifyReply) => {
+export const errorHandler = (
+  error: Error,
+  req: Request,
+  reply: FastifyReply
+) => {
   const apiError: APIError = {
     code: error.name || 'INTERNAL_ERROR',
     message: error.message,
-    timestamp: new Date().toISOString()
-  };
-  
-  reply.status(500).send(apiError);
-};
+    timestamp: new Date().toISOString(),
+  }
+
+  reply.status(500).send(apiError)
+}
 ```
 
 ## Git 工作流程
 
 ### 1. 分支命名規範
+
 ```bash
 # 功能開發
 feature/graph-animation-system
@@ -264,6 +281,7 @@ release/v1.0.0
 ```
 
 ### 2. 提交訊息規範
+
 ```bash
 # ✅ 好的提交訊息
 feat: 實作關聯線序列播放功能
@@ -280,6 +298,7 @@ changes
 ## 性能最佳實務
 
 ### 1. React 性能優化
+
 ```typescript
 // ✅ 使用 React.memo 避免不必要渲染
 export const GraphNode = React.memo<GraphNodeProps>(({ node, isHighlighted }) => {
@@ -297,49 +316,52 @@ const layoutConfig = useMemo(() => {
 ```
 
 ### 2. Cytoscape.js 性能優化
+
 ```typescript
 // ✅ 批次更新節點樣式
 const updateNodeStyles = (nodes: string[], style: any) => {
   cy.batch(() => {
     nodes.forEach(nodeId => {
-      cy.getElementById(nodeId).style(style);
-    });
-  });
-};
+      cy.getElementById(nodeId).style(style)
+    })
+  })
+}
 ```
 
 ## 安全性標準
 
 ### 1. 輸入驗證
+
 ```typescript
 // ✅ 嚴格的輸入驗證
-import { z } from 'zod';
+import { z } from 'zod'
 
 const GraphCreateSchema = z.object({
   title: z.string().min(1).max(255),
   mermaidContent: z.string().min(1),
-  isPublic: z.boolean().default(false)
-});
+  isPublic: z.boolean().default(false),
+})
 
 export const createGraph = async (req: Request, reply: Reply) => {
-  const validation = GraphCreateSchema.safeParse(req.body);
+  const validation = GraphCreateSchema.safeParse(req.body)
   if (!validation.success) {
-    return reply.status(400).send({ error: validation.error });
+    return reply.status(400).send({ error: validation.error })
   }
   // 處理邏輯
-};
+}
 ```
 
 ### 2. XSS 防護
+
 ```typescript
 // ✅ 清理使用者輸入
-import DOMPurify from 'dompurify';
+import DOMPurify from 'dompurify'
 
 const sanitizeMermaidContent = (content: string): string => {
-  return DOMPurify.sanitize(content);
-};
+  return DOMPurify.sanitize(content)
+}
 ```
 
 ---
 
-*所有團隊成員都必須遵循這些標準，以確保程式碼品質與一致性*
+_所有團隊成員都必須遵循這些標準，以確保程式碼品質與一致性_
