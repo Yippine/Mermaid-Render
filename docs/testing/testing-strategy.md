@@ -74,7 +74,7 @@ const customJestConfig = {
     },
   },
   testMatch: [
-    '<rootDir>/__tests__/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/tests/unit/**/*.test.{js,jsx,ts,tsx}',
     '<rootDir>/src/**/__tests__/**/*.test.{js,jsx,ts,tsx}',
     '<rootDir>/server/**/__tests__/**/*.test.{js,ts}',
   ],
@@ -101,7 +101,7 @@ module.exports = createJestConfig(customJestConfig)
 **配置範例**:
 
 ```typescript
-// __tests__/integration/api/render.test.ts
+// tests/unit/api/render.test.ts
 import request from 'supertest'
 import { app } from '@server/app'
 import { setupTestDatabase } from '@server/test/setup'
@@ -200,7 +200,7 @@ export default defineConfig({
 #### React 組件測試
 
 ```typescript
-// __tests__/components/CodeEditor.test.tsx
+// tests/unit/components/CodeEditor.test.tsx
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { CodeEditor } from '@/components/editor/CodeEditor'
@@ -239,7 +239,7 @@ describe('CodeEditor', () => {
 #### Hooks 測試
 
 ```typescript
-// __tests__/hooks/useMermaidRenderer.test.tsx
+// tests/unit/hooks/useMermaidRenderer.test.tsx
 import { renderHook, waitFor } from '@testing-library/react'
 import { useMermaidRenderer } from '@/hooks/useMermaidRenderer'
 
@@ -277,7 +277,7 @@ describe('useMermaidRenderer', () => {
 #### API 端點測試
 
 ```typescript
-// server/__tests__/routes/render.test.ts
+// server/tests/routes/render.test.ts
 import { FastifyInstance } from 'fastify'
 import { build } from '@server/app'
 
@@ -324,7 +324,7 @@ describe('Render Routes', () => {
 #### 服務層測試
 
 ```typescript
-// server/__tests__/services/RenderService.test.ts
+// server/tests/services/RenderService.test.ts
 import { RenderService } from '@server/services/RenderService'
 import { mockMermaidParser } from '@server/test/mocks'
 
@@ -552,7 +552,7 @@ export async function cleanupTestDatabase() {
       "server/src/**/*.{js,ts}",
       "!**/*.d.ts",
       "!**/node_modules/**",
-      "!**/__tests__/**",
+      "!**/tests/**",
       "!**/coverage/**"
     ],
     "coverageReporters": ["text", "lcov", "html"],

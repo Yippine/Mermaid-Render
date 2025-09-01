@@ -22,6 +22,7 @@
     "docker:full:down": "docker-compose -f config/docker/docker-compose.yml down"
   },
   "dependencies": {
+    "@monaco-editor/react": "^4.7.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-tooltip": "^1.0.7",
     "@tanstack/react-query": "^4.35.0",
@@ -31,6 +32,7 @@
     "elkjs": "^0.8.2",
     "framer-motion": "^10.16.0",
     "lucide-react": "^0.294.0",
+    "monaco-editor": "^0.52.2",
     "next": "^14.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

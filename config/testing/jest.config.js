@@ -9,6 +9,11 @@ const createJestConfig = nextJest({
 const customJestConfig = {
   setupFilesAfterEnv: ['<rootDir>/config/testing/jest.setup.js'],
   testEnvironment: 'jsdom',
+  testMatch: [
+    '<rootDir>/tests/unit/**/*.test.{js,jsx,ts,tsx}',
+    '<rootDir>/src/**/__tests__/**/*.{js,jsx,ts,tsx}',
+    '<rootDir>/src/**/*.{test,spec}.{js,jsx,ts,tsx}',
+  ],
   testPathIgnorePatterns: [
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
@@ -22,6 +27,7 @@ const customJestConfig = {
     '^@/hooks/(.*)$': '<rootDir>/src/hooks/$1',
     '^@/types/(.*)$': '<rootDir>/src/types/$1',
     '^@/styles/(.*)$': '<rootDir>/src/styles/$1',
+    '^monaco-editor$': '<rootDir>/tests/mocks/monaco-editor.js',
   },
   collectCoverageFrom: [
     'src/**/*.{js,jsx,ts,tsx}',
