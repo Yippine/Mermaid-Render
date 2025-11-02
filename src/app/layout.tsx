@@ -16,7 +16,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang='zh-TW'>
+    <html lang='en'>
       <body className={inter.className}>
         <div className='min-h-screen bg-background text-foreground'>
           {children}

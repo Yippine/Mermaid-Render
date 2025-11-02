@@ -1,0 +1,112 @@
+{
+  "common": {
+    "description": "AI-driven customizable graph visualization platform",
+    "welcome": "Welcome! 🎉",
+    "subtitle": "Project infrastructure setup complete",
+    "startEditing": "Start Editing"
+  },
+  "editor": {
+    "title": "Mermaid Editor",
+    "syntaxAnalysis": "Syntax Analysis",
+    "syntaxCorrect": "Syntax correct",
+    "issue": "issue",
+    "issues": "issues",
+    "loading": "Rendering diagram...",
+    "insertExample": "Insert Example Code",
+    "awaitingRender": "Awaiting Render",
+    "preparingPreview": "Preparing diagram preview...",
+    "clearingError": "Clearing error state"
+  },
+  "syntaxAnalyzer": {
+    "errors": "Errors",
+    "autoFixes": "Auto Fixes",
+    "settings": "Settings",
+    "toleranceSettings": "Tolerance Settings",
+    "toleranceLevel": "Tolerance Level",
+    "featureOptions": "Feature Options",
+    "autoFix": "Auto Fix",
+    "autoFixDescription": "Automatically fix repairable syntax errors",
+    "versionCompatibility": "Version Compatibility",
+    "versionCompatibilityDescription": "Check and convert different Mermaid version syntax",
+    "advancedSettings": "Advanced Settings",
+    "show": "Show",
+    "hide": "Hide",
+    "ignoredErrorTypes": "Ignored Error Types",
+    "customRules": "Custom Repair Rules",
+    "reset": "Reset"
+  },
+  "toleranceLevels": {
+    "strict": {
+      "label": "Strict",
+      "description": "Only allow completely correct syntax, report all issues"
+    },
+    "standard": {
+      "label": "Standard",
+      "description": "Allow common syntax variants, auto-fix basic issues"
+    },
+    "relaxed": {
+      "label": "Relaxed",
+      "description": "Maximum tolerance for syntax errors, aggressively fix issues"
+    }
+  },
+  "errorTypes": {
+    "missingQuotes": {
+      "label": "Missing Quotes",
+      "description": "Node labels missing quotes"
+    },
+    "invalidNodeId": {
+      "label": "Invalid Node ID",
+      "description": "Node ID format is incorrect"
+    },
+    "inconsistentArrow": {
+      "label": "Inconsistent Arrow",
+      "description": "Mixed different arrow styles"
+    },
+    "indentationError": {
+      "label": "Indentation Error",
+      "description": "Code indentation is inconsistent"
+    },
+    "missingSemicolon": {
+      "label": "Missing Semicolon",
+      "description": "Statement missing semicolon at end"
+    },
+    "invalidCharacter": {
+      "label": "Invalid Character",
+      "description": "Contains unsupported characters"
+    },
+    "duplicateNode": {
+      "label": "Duplicate Node",
+      "description": "Node ID defined multiple times"
+    },
+    "undefinedNodeReference": {
+      "label": "Undefined Node",
+      "description": "References undefined node"
+    },
+    "versionIncompatibility": {
+      "label": "Version Incompatibility",
+      "description": "Mermaid version syntax conflict"
+    }
+  },
+  "errors": {
+    "unknownRendering": "Unknown rendering error",
+    "checkSyntax": "Please check if your Mermaid syntax is correct",
+    "syntaxParsing": "Syntax parsing error: Diagram syntax is incorrect",
+    "unsupportedDiagram": "Unsupported diagram type",
+    "missingDefinitions": "Missing required node or connection definitions",
+    "syntaxError": "Syntax error: Please check code format",
+    "mermaidLoadFailed": "Mermaid failed to load properly",
+    "unsupportedChartType": "Unsupported chart type",
+    "checkDiagramSyntax": "Please check diagram syntax and ensure all nodes and connections are correctly defined",
+    "referToDocumentation": "This diagram type may not be supported, please refer to documentation for supported types",
+    "ensureNodesDeclared": "Please ensure all referenced nodes are properly declared",
+    "checkSyntaxLines": "Please check syntax, especially lines {start}-{end} format",
+    "referToMermaidDocs": "Please check syntax and refer to official Mermaid documentation",
+    "unexpectedError": "Unexpected error occurred during rendering",
+    "contactSupport": "Please check your syntax or contact support team"
+  },
+  "languages": {
+    "en": "English",
+    "zh-TW": "繁體中文",
+    "zh-CN": "简体中文"
+  }
+}

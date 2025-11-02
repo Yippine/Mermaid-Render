@@ -6,6 +6,7 @@ export interface EditorStore {
   code: string
   theme: 'light' | 'dark'
   panelRatio: number
+  analyzerPanelHeight: number
   isPreviewCollapsed: boolean
   isEditorCollapsed: boolean
   isLoading: boolean
@@ -15,6 +16,7 @@ export interface EditorStore {
   updateCode: (code: string) => void
   setTheme: (theme: 'light' | 'dark') => void
   setPanelRatio: (ratio: number) => void
+  setAnalyzerPanelHeight: (height: number) => void
   togglePreview: () => void
   toggleEditor: () => void
   setLoading: (loading: boolean) => void
@@ -35,6 +37,7 @@ export const useEditorStore = create<EditorStore>()(
     E --> F`,
       theme: 'dark',
       panelRatio: 0.5,
+      analyzerPanelHeight: 320, // Default height (80 * 4 = 320px in Tailwind)
       isPreviewCollapsed: false,
       isEditorCollapsed: false,
       isLoading: false,
@@ -53,6 +56,14 @@ export const useEditorStore = create<EditorStore>()(
         // 確保比例在合理範圍內 (20%-80%)
         const clampedRatio = Math.max(0.2, Math.min(0.8, ratio))
         set({ panelRatio: clampedRatio })
+      },
+
+      setAnalyzerPanelHeight: (height: number) => {
+        // Clamp height between 200px and 80vh (roughly 600px on typical screens)
+        const minHeight = 200
+        const maxHeight = Math.floor(window.innerHeight * 0.8)
+        const clampedHeight = Math.max(minHeight, Math.min(maxHeight, height))
+        set({ analyzerPanelHeight: clampedHeight })
       },
 
       togglePreview: () => {
@@ -86,6 +97,7 @@ export const useEditorStore = create<EditorStore>()(
       resetPanels: () => {
         set({
           panelRatio: 0.5,
+          analyzerPanelHeight: 320,
           isPreviewCollapsed: false,
           isEditorCollapsed: false,
         })
@@ -96,7 +108,8 @@ export const useEditorStore = create<EditorStore>()(
       partialize: state => ({
         theme: state.theme,
         panelRatio: state.panelRatio,
-        code: state.code,
+        analyzerPanelHeight: state.analyzerPanelHeight,
+        // 不持久化 code，讓它每次都使用初始值
       }),
     }
   )

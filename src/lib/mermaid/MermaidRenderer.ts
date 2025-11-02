@@ -1,4 +1,4 @@
-import mermaid from 'mermaid'
+// 延遲導入 mermaid 以支援 SSR
 import { RenderOptions, RenderResult } from '@/types/mermaid.types'
 import { detectChartType, isChartTypeSupported } from './typeDetection'
 import { ErrorHandler } from './errorHandler'
@@ -8,22 +8,82 @@ export class MermaidRenderer {
   private cache: RenderCache
   private errorHandler: ErrorHandler
   private isInitialized = false
+  private mermaid: typeof import('mermaid').default | null = null
 
   constructor() {
     this.cache = new RenderCache()
     this.errorHandler = new ErrorHandler()
   }
 
-  private initializeMermaid(): void {
+  private cleanupMermaidErrors(): void {
+    // Remove any mermaid error elements that might be appended to the DOM
+    const errorSelectors = [
+      '.mermaid-error',
+      '[id^="mermaid-"]',
+      '.mermaidTooltip',
+      '.d3-tip',
+    ]
+
+    errorSelectors.forEach(selector => {
+      const elements = document.querySelectorAll(selector)
+      elements.forEach(element => {
+        if (
+          element.textContent?.includes('Syntax error') ||
+          element.textContent?.includes('mermaid version')
+        ) {
+          element.remove()
+        }
+      })
+    })
+
+    // Also remove any text nodes containing mermaid errors
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode: node => {
+          return node.textContent?.includes('Syntax error in text') ||
+            node.textContent?.includes('mermaid version')
+            ? NodeFilter.FILTER_ACCEPT
+            : NodeFilter.FILTER_REJECT
+        },
+      }
+    )
+
+    const textNodes: Text[] = []
+    let node = walker.nextNode()
+    while (node) {
+      textNodes.push(node as Text)
+      node = walker.nextNode()
+    }
+
+    textNodes.forEach(textNode => {
+      if (textNode.parentElement) {
+        textNode.parentElement.remove()
+      }
+    })
+  }
+
+  private async initializeMermaid(): Promise<void> {
     if (this.isInitialized) return
 
     try {
-      mermaid.initialize({
+      console.log('Loading Mermaid...')
+      // 動態導入 mermaid 以支援 SSR
+      const mermaidModule = await import('mermaid')
+      this.mermaid = mermaidModule.default
+
+      console.log('Initializing Mermaid...')
+      this.mermaid.initialize({
         startOnLoad: false,
         theme: 'default',
         securityLevel: 'loose',
-        logLevel: 'error',
+        logLevel: 'silent', // Prevent mermaid errors from appearing in DOM
       })
+
+      // Clean up any existing mermaid error elements in the DOM
+      this.cleanupMermaidErrors()
+      console.log('Mermaid initialized successfully')
       this.isInitialized = true
     } catch (error) {
       console.error('Mermaid initialization failed:', error)
@@ -36,9 +96,18 @@ export class MermaidRenderer {
     code: string,
     options: RenderOptions = {}
   ): Promise<RenderResult> {
-    this.initializeMermaid()
+    console.log('Starting render with code:', code.substring(0, 100) + '...')
+    await this.initializeMermaid()
+
+    if (!this.mermaid) {
+      return this.errorHandler.handleRenderError(
+        new Error('Mermaid failed to load properly'),
+        code
+      )
+    }
 
     const cacheKey = this.generateCacheKey(code, options)
+    console.log('Generated cache key:', cacheKey)
 
     // 檢查快取
     const cached = this.cache.get(cacheKey)
@@ -57,16 +126,19 @@ export class MermaidRenderer {
 
       if (!isChartTypeSupported(chartType)) {
         return this.errorHandler.handleRenderError(
-          new Error(`不支援的圖表類型: ${chartType}`),
+          new Error(`Unsupported chart type: ${chartType}`),
           code
         )
       }
 
       // 渲染圖表
+      console.log('Rendering chart type:', chartType)
       const startTime = performance.now()
       const element = `mermaid-${Date.now()}-${Math.random().toString(36).slice(2)}`
-      const { svg } = await mermaid.render(element, code)
+      console.log('Calling mermaid.render with element:', element)
+      const { svg } = await this.mermaid.render(element, code)
       const renderTime = performance.now() - startTime
+      console.log('Mermaid render completed, SVG length:', svg.length)
 
       // 後處理 SVG
       const processedSvg = this.postProcessSVG(svg, options)
@@ -88,13 +160,31 @@ export class MermaidRenderer {
 
       return result
     } catch (error) {
+      // Clean up any DOM errors that might have been created
+      this.cleanupMermaidErrors()
       return this.errorHandler.handleRenderError(error, code)
     }
   }
 
   private generateCacheKey(code: string, options: RenderOptions): string {
     const optionsStr = JSON.stringify(options)
-    return `${btoa(code.trim())}-${btoa(optionsStr)}`
+    return `${this.utf8ToBase64(code.trim())}-${this.utf8ToBase64(optionsStr)}`
+  }
+
+  private utf8ToBase64(str: string): string {
+    // 為了支援中文字符，我們使用更簡單但穩定的方法
+    // 直接使用 hash 算法，避免 btoa 的字符編碼問題
+    return this.simpleHash(str)
+  }
+
+  private simpleHash(str: string): string {
+    let hash = 0
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i)
+      hash = (hash << 5) - hash + char
+      hash = hash & hash // 轉為 32 位整數
+    }
+    return hash.toString(36)
   }
 
   private postProcessSVG(svg: string, options: RenderOptions): string {
@@ -197,14 +287,16 @@ export class MermaidRenderer {
       },
     }
 
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: 'loose',
-      fontFamily: 'Inter, system-ui, sans-serif',
-      fontSize: 14,
-      logLevel: 'error',
-      ...themeConfigs[theme],
-    })
+    if (this.mermaid) {
+      this.mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'loose',
+        fontFamily: 'Inter, system-ui, sans-serif',
+        fontSize: 14,
+        logLevel: 'silent',
+        ...themeConfigs[theme],
+      })
+    }
 
     // Clear cache when theme changes
     this.clearCache()

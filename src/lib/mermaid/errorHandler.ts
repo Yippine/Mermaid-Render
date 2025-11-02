@@ -31,45 +31,45 @@ export class ErrorHandler {
     }
 
     return {
-      message: '未知的渲染錯誤',
-      suggestion: '請檢查 Mermaid 語法是否正確',
+      message: 'Unknown rendering error',
+      suggestion: 'Please check if your Mermaid syntax is correct',
     }
   }
 
   private humanizeError(errorMessage: string): string {
-    // 將 Mermaid 錯誤訊息轉換為使用者友善的中文訊息
+    // Convert Mermaid error messages to user-friendly English messages
     if (errorMessage.includes('Parse error')) {
-      return '語法解析錯誤：圖表語法不正確'
+      return 'Syntax parsing error: Diagram syntax is incorrect'
     }
     if (errorMessage.includes('Unsupported diagram type')) {
-      return '不支援的圖表類型'
+      return 'Unsupported diagram type'
     }
     if (errorMessage.includes('undefined')) {
-      return '缺少必要的節點或連接定義'
+      return 'Missing required node or connection definitions'
     }
     if (errorMessage.includes('syntax')) {
-      return '語法錯誤：請檢查程式碼格式'
+      return 'Syntax error: Please check code format'
     }
 
     return errorMessage
   }
 
   private getSuggestion(errorMessage: string, code: string): string {
-    // 基於錯誤訊息和程式碼內容提供修復建議
+    // Provide fix suggestions based on error message and code content
     if (errorMessage.includes('Parse error')) {
-      return '請檢查圖表語法，確認所有節點和連接都正確定義'
+      return 'Please check diagram syntax and ensure all nodes and connections are correctly defined'
     }
     if (errorMessage.includes('Unsupported')) {
-      return '此圖表類型可能不受支援，請參考文件查看支援的類型'
+      return 'This diagram type may not be supported, please refer to documentation for supported types'
     }
     if (errorMessage.includes('undefined')) {
-      return '請確認所有引用的節點都已正確宣告'
+      return 'Please ensure all referenced nodes are properly declared'
     }
     if (errorMessage.includes('syntax')) {
       const lines = code.split('\n').length
-      return `請檢查語法，特別是第 1-${Math.min(lines, 10)} 行的格式`
+      return `Please check syntax, especially lines 1-${Math.min(lines, 10)} format`
     }
 
-    return '請檢查語法並參考 Mermaid 官方文件'
+    return 'Please check syntax and refer to official Mermaid documentation'
   }
 }

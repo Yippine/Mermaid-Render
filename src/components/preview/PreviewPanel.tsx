@@ -33,6 +33,16 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
     }
   }, [code, renderMermaid])
 
+  // 調試渲染狀態
+  useEffect(() => {
+    console.log('PreviewPanel - renderState:', renderState)
+    console.log('PreviewPanel - renderResult:', renderResult)
+    console.log('PreviewPanel - has SVG:', !!renderResult?.svg)
+    if (renderResult?.svg) {
+      console.log('PreviewPanel - SVG length:', renderResult.svg.length)
+    }
+  }, [renderState, renderResult])
+
   const handleRetry = useCallback(() => {
     if (code.trim()) {
       renderMermaid(code)
@@ -40,12 +50,31 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
   }, [code, renderMermaid])
 
   const handleClearError = useCallback(() => {
+    console.log('Clearing error state')
     clearCache()
-  }, [clearCache])
+    // Re-trigger rendering
+    if (code.trim()) {
+      renderMermaid(code)
+    }
+  }, [clearCache, code, renderMermaid])
 
   const handleInsertExample = useCallback(() => {
-    // 這將由父組件處理，這裡先留空
-    console.log('插入範例程式碼')
+    const exampleCode = `graph TD
+    A[開始] --> B[處理資料]
+    B --> C{判斷條件}
+    C -->|是| D[執行操作]
+    C -->|否| E[跳過操作]
+    D --> F[結束]
+    E --> F
+    
+    %% 這是註解
+    style A fill:#e1f5fe
+    style F fill:#c8e6c9
+    style C fill:#fff3e0`
+
+    // 使用 store 來更新代碼
+    const { updateCode } = useEditorStore.getState()
+    updateCode(exampleCode)
   }, [])
 
   // 渲染狀態管理
@@ -54,7 +83,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       <div
         className={clsx('flex items-center justify-center h-full', className)}
       >
-        <LoadingSpinner size='lg' message='正在渲染圖表...' />
+        <LoadingSpinner size='lg' message='Rendering diagram...' />
       </div>
     )
   }
@@ -82,7 +111,7 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
         <EmptyState
           type='welcome'
           action={{
-            label: '插入範例程式碼',
+            label: 'Insert Example Code',
             onClick: handleInsertExample,
           }}
         />
@@ -95,8 +124,8 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       <div className={clsx('h-full', className)}>
         <EmptyState
           type='empty'
-          title='等待渲染'
-          description='正在準備圖表預覽...'
+          title='Awaiting Render'
+          description='Preparing diagram preview...'
         />
       </div>
     )
@@ -107,10 +136,10 @@ export const PreviewPanel: React.FC<PreviewPanelProps> = ({
       className={clsx('h-full overflow-auto bg-background', className)}
       data-testid='preview-panel'
     >
-      <div className='flex items-center justify-center min-h-full p-4'>
+      <div className='h-full p-4'>
         <InteractiveSVG
           svgContent={renderResult.svg}
-          className='max-w-full max-h-full'
+          className='w-full h-full'
         />
       </div>
     </div>

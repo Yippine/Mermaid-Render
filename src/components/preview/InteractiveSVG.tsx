@@ -25,6 +25,28 @@ export const InteractiveSVG: React.FC<InteractiveSVGProps> = ({
   onTransformChange,
   onInteraction,
 }) => {
+  // 調試 SVG 內容
+  console.log('InteractiveSVG - svgContent length:', svgContent?.length)
+  console.log(
+    'InteractiveSVG - svgContent preview:',
+    svgContent?.substring(0, 200) + '...'
+  )
+
+  // 臨時：檢查 SVG 是否實際渲染
+  useEffect(() => {
+    console.log('InteractiveSVG - useEffect triggered')
+    if (svgRef.current) {
+      console.log('InteractiveSVG - svgRef element:', svgRef.current)
+      console.log(
+        'InteractiveSVG - innerHTML length:',
+        svgRef.current.innerHTML.length
+      )
+      console.log('InteractiveSVG - clientWidth:', svgRef.current.clientWidth)
+      console.log('InteractiveSVG - clientHeight:', svgRef.current.clientHeight)
+      console.log('InteractiveSVG - offsetWidth:', svgRef.current.offsetWidth)
+      console.log('InteractiveSVG - offsetHeight:', svgRef.current.offsetHeight)
+    }
+  }, [svgContent])
   const [transform, setTransform] = useState<Transform>({
     x: 0,
     y: 0,
@@ -69,6 +91,11 @@ export const InteractiveSVG: React.FC<InteractiveSVGProps> = ({
 
   const handleMouseDown = useCallback(
     (e: React.MouseEvent) => {
+      // 確保容器獲得焦點以接收鍵盤事件
+      if (containerRef.current) {
+        containerRef.current.focus()
+      }
+
       if (e.button === 0) {
         // Left mouse button
         setIsDragging(true)
@@ -114,16 +141,16 @@ export const InteractiveSVG: React.FC<InteractiveSVGProps> = ({
 
       switch (e.key) {
         case 'ArrowUp':
-          newTransform.y += step
+          newTransform.y -= step // 向上應該是減少 Y
           break
         case 'ArrowDown':
-          newTransform.y -= step
+          newTransform.y += step // 向下應該是增加 Y
           break
         case 'ArrowLeft':
-          newTransform.x += step
+          newTransform.x -= step
           break
         case 'ArrowRight':
-          newTransform.x -= step
+          newTransform.x += step
           break
         case '=':
         case '+':
@@ -203,6 +230,7 @@ export const InteractiveSVG: React.FC<InteractiveSVGProps> = ({
         isDragging && 'cursor-grabbing',
         className
       )}
+      style={{ minHeight: '400px' }} // 確保容器有最小高度
       onMouseDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
       tabIndex={0}
@@ -211,11 +239,12 @@ export const InteractiveSVG: React.FC<InteractiveSVGProps> = ({
     >
       <div
         ref={svgRef}
-        className='absolute inset-0 flex items-center justify-center'
+        className='absolute inset-0 flex items-center justify-center min-h-full'
         style={{
           transform: `translate(${transform.x}px, ${transform.y}px) scale(${transform.scale})`,
           transformOrigin: 'center center',
           transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+          minHeight: '400px', // 確保最小高度
         }}
         dangerouslySetInnerHTML={{ __html: svgContent }}
       />

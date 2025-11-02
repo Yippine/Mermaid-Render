@@ -62,6 +62,11 @@ export const useMermaidRenderer = (
       const currentController = abortControllerRef.current
 
       try {
+        // Clear any previous error state immediately when starting a new render
+        if (renderState === 'error') {
+          setRenderResult(null)
+        }
+
         setRenderState('loading')
 
         const result = await rendererRef.current!.render(code, options)
@@ -85,8 +90,8 @@ export const useMermaidRenderer = (
           success: false,
           svg: '',
           error: {
-            message: '渲染過程中發生未預期的錯誤',
-            suggestion: '請檢查程式碼語法或聯繫支援團隊',
+            message: 'Unexpected error occurred during rendering',
+            suggestion: 'Please check your syntax or contact support team',
           },
           metadata: {
             chartType: 'unknown',
@@ -98,7 +103,7 @@ export const useMermaidRenderer = (
         })
       }
     },
-    []
+    [renderState]
   )
 
   // 保留防抖函數以供未來使用

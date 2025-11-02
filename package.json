@@ -35,6 +35,7 @@
     "mermaid": "^10.9.4",
     "monaco-editor": "^0.52.2",
     "next": "^14.0.0",
+    "next-intl": "^4.3.5",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "tailwind-merge": "^2.0.0",

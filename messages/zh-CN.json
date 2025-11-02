@@ -1,0 +1,112 @@
+{
+  "common": {
+    "description": "AI 驱动的高定制化图表展示平台",
+    "welcome": "欢迎使用！ 🎉",
+    "subtitle": "项目基础架构建立完成",
+    "startEditing": "开始编辑"
+  },
+  "editor": {
+    "title": "Mermaid 编辑器",
+    "syntaxAnalysis": "语法分析",
+    "syntaxCorrect": "语法正确",
+    "issue": "个问题",
+    "issues": "个问题",
+    "loading": "正在渲染图表...",
+    "insertExample": "插入示例代码",
+    "awaitingRender": "等待渲染",
+    "preparingPreview": "正在准备图表预览...",
+    "clearingError": "清除错误状态"
+  },
+  "syntaxAnalyzer": {
+    "errors": "错误",
+    "autoFixes": "修复建议",
+    "settings": "设置",
+    "toleranceSettings": "容错设置",
+    "toleranceLevel": "容错级别",
+    "featureOptions": "功能选项",
+    "autoFix": "自动修复",
+    "autoFixDescription": "自动修复可修复的语法错误",
+    "versionCompatibility": "版本兼容性",
+    "versionCompatibilityDescription": "检查和转换不同 Mermaid 版本语法",
+    "advancedSettings": "高级设置",
+    "show": "显示",
+    "hide": "隐藏",
+    "ignoredErrorTypes": "忽略的错误类型",
+    "customRules": "自定义修复规则",
+    "reset": "重置"
+  },
+  "toleranceLevels": {
+    "strict": {
+      "label": "严格",
+      "description": "只允许完全正确的语法，报告所有问题"
+    },
+    "standard": {
+      "label": "标准",
+      "description": "允许常见的语法变体，自动修复基本问题"
+    },
+    "relaxed": {
+      "label": "宽松",
+      "description": "最大程度容忍语法错误，积极修复问题"
+    }
+  },
+  "errorTypes": {
+    "missingQuotes": {
+      "label": "缺少引号",
+      "description": "节点标签缺少引号"
+    },
+    "invalidNodeId": {
+      "label": "无效节点 ID",
+      "description": "节点 ID 格式不正确"
+    },
+    "inconsistentArrow": {
+      "label": "箭头不一致",
+      "description": "混用不同箭头样式"
+    },
+    "indentationError": {
+      "label": "缩进错误",
+      "description": "代码缩进不一致"
+    },
+    "missingSemicolon": {
+      "label": "缺少分号",
+      "description": "语句末尾缺少分号"
+    },
+    "invalidCharacter": {
+      "label": "无效字符",
+      "description": "包含不支持的字符"
+    },
+    "duplicateNode": {
+      "label": "重复节点",
+      "description": "节点 ID 重复定义"
+    },
+    "undefinedNodeReference": {
+      "label": "未定义节点",
+      "description": "引用了未定义的节点"
+    },
+    "versionIncompatibility": {
+      "label": "版本不兼容",
+      "description": "Mermaid 版本语法冲突"
+    }
+  },
+  "errors": {
+    "unknownRendering": "未知的渲染错误",
+    "checkSyntax": "请检查 Mermaid 语法是否正确",
+    "syntaxParsing": "语法解析错误：图表语法不正确",
+    "unsupportedDiagram": "不支持的图表类型",
+    "missingDefinitions": "缺少必要的节点或连接定义",
+    "syntaxError": "语法错误：请检查代码格式",
+    "mermaidLoadFailed": "Mermaid 未能正确加载",
+    "unsupportedChartType": "不支持的图表类型",
+    "checkDiagramSyntax": "请检查图表语法，确认所有节点和连接都正确定义",
+    "referToDocumentation": "此图表类型可能不受支持，请参考文档查看支持的类型",
+    "ensureNodesDeclared": "请确认所有引用的节点都已正确声明",
+    "checkSyntaxLines": "请检查语法，特别是第 {start}-{end} 行的格式",
+    "referToMermaidDocs": "请检查语法并参考 Mermaid 官方文档",
+    "unexpectedError": "渲染过程中发生未预期的错误",
+    "contactSupport": "请检查代码语法或联系支持团队"
+  },
+  "languages": {
+    "en": "English",
+    "zh-TW": "繁體中文",
+    "zh-CN": "简体中文"
+  }
+}
